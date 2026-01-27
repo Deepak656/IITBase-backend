@@ -1,0 +1,34 @@
+spring:
+  profiles:
+    active: dev
+  application:
+    name: iitbase-backend
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  sql:
+    init:
+      mode: always
+
+server:
+  port: 8080
+  error:
+    include-message: always
+
+app:
+  report-threshold: 3
+bucket4j:
+  enabled: true
+  filters:
+    - cache-name: rate-limit-buckets
+      url: /api/auth/.*
+      rate-limits:
+        - bandwidths:
+            - capacity: 10
+              time: 1
+              unit: hours

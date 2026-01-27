@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/iitbase
+    username: postgres
+    password: deepak
+    driver-class-name: org.postgresql.Driver
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 60000
+
+jwt:
+  secret: dev_only_secret_key_low_security_is_fine_here
+  expiration: 86400000
+
+sendgrid:
+  api:
+    key: ${SENDGRID_API_KEY:mock_key_for_dev}
+  from-email: hello@iitbase.com
+logging:
+  level:
+    com:
+      iitbase: INFO
+    org:
+      springframework:
+        security: DEBUG
