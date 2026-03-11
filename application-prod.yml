@@ -14,8 +14,8 @@ spring:
       timeout: 5000
 
 jwt:
-  secret: ${JWT_SECRET_KEY} # Must be a long, secure string
-  expiration: 86400000
+  secret: ${JWT_SECRET} # Must be a long, secure string
+  expiration: ${JWT_EXPIRATION:86400000}
 
 sendgrid:
   api:
