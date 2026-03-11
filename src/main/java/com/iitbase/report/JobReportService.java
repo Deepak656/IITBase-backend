@@ -18,7 +18,7 @@ public class JobReportService {
     private final JobReportRepository reportRepository;
     private final JobService jobService;
 
-    @Value("${app.report-threshold}")
+    @Value("${app.report-threshold:3}")
     private int reportThreshold;
 
     @Transactional

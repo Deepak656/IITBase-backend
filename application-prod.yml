@@ -8,7 +8,7 @@ spring:
     redis:
       host: ${REDISHOST:redis.iitbase.com}
       port: ${REDISPORT:6379}
-      password: ${REDIS_PASSWORD}
+      password: ${REDISPASSWORD}
       ssl:
         enabled: false # Redis has no ssl, that's for upstash
       timeout: 5000
