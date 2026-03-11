@@ -1,5 +1,6 @@
 spring:
-  profile: dev
+  profiles:
+    active: dev
   application:
     name: iitbase-backend
   jpa:
