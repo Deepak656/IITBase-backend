@@ -1,6 +1,5 @@
 spring:
-  profiles:
-    active: dev
+  profile: dev
   application:
     name: iitbase-backend
   jpa:
@@ -16,7 +15,7 @@ spring:
       mode: always
 
 server:
-  port: 8080
+  port: ${PORT:8080}
   error:
     include-message: always
 

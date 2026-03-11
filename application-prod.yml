@@ -1,16 +1,16 @@
 spring:
   datasource:
-    url: jdbc:postgresql://${DB_HOST:iitbase-db-prod}:5432/iitbase
+    url: jdbc:postgresql://${PGHOST}:${PGPORT:5432}/${PGDATABASE}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
   data:
     redis:
-      host: ${REDIS_HOST:redis.iitbase.com}
-      port: 6379
+      host: ${REDISHOST:redis.iitbase.com}
+      port: ${REDISPORT:6379}
       password: ${REDIS_PASSWORD}
       ssl:
-        enabled: true # Recommended for production
+        enabled: false # Redis has no ssl, that's for upstash
       timeout: 5000
 
 jwt:
@@ -21,3 +21,8 @@ sendgrid:
   api:
     key: ${SENDGRID_API_KEY}
   from-email: hello@iitbase.com
+
+logging:
+  level:
+    com.iitbase: INFO
+    org.springframework.security: WARN
