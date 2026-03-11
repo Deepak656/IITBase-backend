@@ -15,7 +15,7 @@ Built with Spring Boot 3.2, PostgreSQL, and Redis. Designed as a modular monolit
 | Auth | Spring Security + JWT + Redis | Stateless tokens, Redis for whitelisting |
 | ORM | Spring Data JPA + Hibernate 6 | Type-safe queries, auditing              |
 | Database | PostgreSQL 14+ | JSONB, full-text search, mature tooling  |
-| Cache / Sessions | Redis | OTP rate limiting, token blacklist       |
+| Cache / Sessions | Redis | OTP rate limiting, token whitelist       |
 | Email | SendGrid | Transactional OTP delivery               |
 | Build | Maven | Dependency management, CI compatibility  |
 
