@@ -1,0 +1,151 @@
+-- IITBase Profile Schema
+-- Drop tables if exist (in correct order due to foreign keys)
+DROP TABLE IF EXISTS jobseeker_diversity_info CASCADE;
+DROP TABLE IF EXISTS jobseeker_links CASCADE;
+DROP TABLE IF EXISTS jobseeker_resume CASCADE;
+DROP TABLE IF EXISTS jobseeker_education CASCADE;
+DROP TABLE IF EXISTS jobseeker_work_experience CASCADE;
+DROP TABLE IF EXISTS jobseeker_skills CASCADE;
+DROP TABLE IF EXISTS jobseeker_job_preferences CASCADE;
+DROP TABLE IF EXISTS jobseekers CASCADE;
+
+-- Main jobseeker table (reference to your auth user table)
+CREATE TABLE jobseekers (
+    id BIGSERIAL PRIMARY KEY,
+    user_id VARCHAR(255) UNIQUE NOT NULL, -- From your JWT/Redis auth
+    email VARCHAR(255) UNIQUE NOT NULL,
+    full_name VARCHAR(255),
+    phone VARCHAR(20),
+    profile_photo_url TEXT,
+    is_on_career_break BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Job Preferences
+CREATE TABLE jobseeker_job_preferences (
+    id BIGSERIAL PRIMARY KEY,
+    jobseeker_id BIGINT NOT NULL,
+    current_location VARCHAR(255),
+    work_location_type VARCHAR(50), -- ANYWHERE_IN_INDIA, ANYWHERE_OUTSIDE_INDIA, SPECIFIC_CITIES
+    preferred_cities TEXT[], -- Array of cities
+    previous_salary DECIMAL(12, 2),
+    previous_salary_currency VARCHAR(10) DEFAULT 'INR',
+    notice_period VARCHAR(50), -- IMMEDIATELY, 15_DAYS, 1_MONTH, 2_MONTHS, 3_MONTHS
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (jobseeker_id) REFERENCES jobseekers(id) ON DELETE CASCADE,
+    UNIQUE(jobseeker_id)
+);
+
+-- Skills
+CREATE TABLE jobseeker_skills (
+    id BIGSERIAL PRIMARY KEY,
+    jobseeker_id BIGINT NOT NULL,
+    previous_role VARCHAR(255),
+    main_skills TEXT[], -- Array of skills
+    languages TEXT[], -- Array of languages
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (jobseeker_id) REFERENCES jobseekers(id) ON DELETE CASCADE,
+    UNIQUE(jobseeker_id)
+);
+
+-- Work Experience (multiple entries)
+CREATE TABLE jobseeker_work_experience (
+    id BIGSERIAL PRIMARY KEY,
+    jobseeker_id BIGINT NOT NULL,
+    company_name VARCHAR(255) NOT NULL,
+    job_title VARCHAR(255) NOT NULL,
+    employment_type VARCHAR(50), -- FULL_TIME, PART_TIME, CONTRACT, INTERNSHIP
+    location VARCHAR(255),
+    is_current BOOLEAN DEFAULT FALSE,
+    start_date DATE NOT NULL,
+    end_date DATE,
+    description TEXT,
+    display_order INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (jobseeker_id) REFERENCES jobseekers(id) ON DELETE CASCADE
+);
+
+-- Education (multiple entries)
+CREATE TABLE jobseeker_education (
+    id BIGSERIAL PRIMARY KEY,
+    jobseeker_id BIGINT NOT NULL,
+    institution_name VARCHAR(255) NOT NULL,
+    degree VARCHAR(255) NOT NULL,
+    field_of_study VARCHAR(255),
+    graduation_year INT,
+    cgpa DECIMAL(4, 2),
+    description TEXT,
+    display_order INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (jobseeker_id) REFERENCES jobseekers(id) ON DELETE CASCADE
+);
+
+-- Resume
+CREATE TABLE jobseeker_resume (
+    id BIGSERIAL PRIMARY KEY,
+    jobseeker_id BIGINT NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
+    file_url TEXT NOT NULL,
+    file_size BIGINT, -- in bytes
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_primary BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (jobseeker_id) REFERENCES jobseekers(id) ON DELETE CASCADE
+);
+
+-- Links (Portfolio, LinkedIn, GitHub, etc.)
+CREATE TABLE jobseeker_links (
+    id BIGSERIAL PRIMARY KEY,
+    jobseeker_id BIGINT NOT NULL,
+    link_type VARCHAR(50) NOT NULL, -- LINKEDIN, GITHUB, PORTFOLIO, TWITTER, OTHER
+    url TEXT NOT NULL,
+    display_order INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (jobseeker_id) REFERENCES jobseekers(id) ON DELETE CASCADE
+);
+
+-- Diversity Information
+CREATE TABLE jobseeker_diversity_info (
+    id BIGSERIAL PRIMARY KEY,
+    jobseeker_id BIGINT NOT NULL,
+    gender VARCHAR(50),
+    veteran_status BOOLEAN DEFAULT FALSE,
+    disability_status BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (jobseeker_id) REFERENCES jobseekers(id) ON DELETE CASCADE,
+    UNIQUE(jobseeker_id)
+);
+
+-- Create indexes for performance
+CREATE INDEX idx_jobseeker_user_id ON jobseekers(user_id);
+CREATE INDEX idx_job_preferences_jobseeker ON jobseeker_job_preferences(jobseeker_id);
+CREATE INDEX idx_skills_jobseeker ON jobseeker_skills(jobseeker_id);
+CREATE INDEX idx_work_exp_jobseeker ON jobseeker_work_experience(jobseeker_id);
+CREATE INDEX idx_education_jobseeker ON jobseeker_education(jobseeker_id);
+CREATE INDEX idx_resume_jobseeker ON jobseeker_resume(jobseeker_id);
+CREATE INDEX idx_links_jobseeker ON jobseeker_links(jobseeker_id);
+CREATE INDEX idx_diversity_jobseeker ON jobseeker_diversity_info(jobseeker_id);
+
+-- Create updated_at trigger function
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Apply triggers to all tables
+CREATE TRIGGER update_jobseekers_updated_at BEFORE UPDATE ON jobseekers FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_job_preferences_updated_at BEFORE UPDATE ON jobseeker_job_preferences FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_skills_updated_at BEFORE UPDATE ON jobseeker_skills FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_work_exp_updated_at BEFORE UPDATE ON jobseeker_work_experience FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_education_updated_at BEFORE UPDATE ON jobseeker_education FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_links_updated_at BEFORE UPDATE ON jobseeker_links FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_diversity_updated_at BEFORE UPDATE ON jobseeker_diversity_info FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

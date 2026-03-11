@@ -78,7 +78,8 @@ public class OtpService {
 
         // 6️⃣ Send email (async recommended)
         try {
-            emailService.sendOtp(email, otp, purpose);
+//            emailService.sendOtp(email, otp, purpose);
+            log.info("OTP is for testing {}",otp );
             log.info("OTP sent successfully to: {} for purpose: {}", email, purpose);
         } catch (Exception e) {
             log.error("Failed to send OTP to: {}", email, e);

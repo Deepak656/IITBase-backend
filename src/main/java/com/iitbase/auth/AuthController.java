@@ -3,12 +3,14 @@ package com.iitbase.auth;
 import com.iitbase.auth.dto.AuthResponse;
 import com.iitbase.auth.dto.LoginRequest;
 import com.iitbase.auth.dto.SignupRequest;
+import com.iitbase.auth.dto.SignupResponse;
 import com.iitbase.common.ApiResponse;
 import com.iitbase.email.OtpPurpose;
 import com.iitbase.email.OtpService;
 import com.iitbase.email.ResendOtpRequest;
 import com.iitbase.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +33,7 @@ public class AuthController {
             HttpServletRequest request) {
 
         if (userService.existsByEmail(email)) {
-            throw new IllegalArgumentException("Email already registered");
+            throw new IllegalArgumentException("Registration failed or user already exists.");
         }
 
         String ipAddress = getClientIp(request);
@@ -39,14 +41,14 @@ public class AuthController {
 
         return ResponseEntity.ok(ApiResponse.success(null, "OTP sent successfully"));
     }
-
+    @Transactional
     @PostMapping("/signup/verify-otp")
-    public ResponseEntity<ApiResponse<AuthResponse>> verifySignupOtp(
+    public ResponseEntity<ApiResponse<SignupResponse>> verifySignupOtp(
             @Valid @RequestBody SignupRequest signupRequest,
             @RequestParam String otp) {
 
         otpService.validateOtp(signupRequest.getEmail(), otp, OtpPurpose.SIGNUP);
-        AuthResponse response = authService.signup(signupRequest);
+        SignupResponse response = authService.signup(signupRequest);
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }

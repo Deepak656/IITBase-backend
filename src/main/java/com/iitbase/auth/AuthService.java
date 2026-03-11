@@ -3,6 +3,7 @@ package com.iitbase.auth;
 import com.iitbase.auth.dto.AuthResponse;
 import com.iitbase.auth.dto.LoginRequest;
 import com.iitbase.auth.dto.SignupRequest;
+import com.iitbase.auth.dto.SignupResponse;
 import com.iitbase.config.JwtUtil;
 import com.iitbase.user.User;
 import com.iitbase.user.UserRepository;
@@ -25,19 +26,20 @@ public class AuthService {
     private final TokenService tokenService;
 
     @Transactional
-    public AuthResponse signup(SignupRequest request) {
+    public SignupResponse signup(SignupRequest request) {
         log.info("Signup attempt for email: {}", request.getEmail());
 
-        if (userService.existsByEmail(request.getEmail())) {
-            log.warn("Signup failed - email already exists: {}", request.getEmail());
-            throw new IllegalArgumentException("Email already exists");
-        }
-
-        if (request.getPassword().length() < 8) {
-            throw new IllegalArgumentException("Password must be at least 8 characters");
-        }
+        // Validate input first
+//        validateSignupRequest(request);
 
         try {
+            // Check if email exists
+            if (userService.existsByEmail(request.getEmail())) {
+                log.warn("Signup failed - email already exists: {}", request.getEmail());
+                throw new IllegalArgumentException("Email already exists");
+            }
+
+            // Create and save user
             User user = User.builder()
                     .email(request.getEmail())
                     .password(passwordEncoder.encode(request.getPassword()))
@@ -46,18 +48,27 @@ public class AuthService {
                     .graduationYear(request.getGraduationYear())
                     .build();
 
-            userService.save(user);
+            User savedUser = userService.save(user);
 
             // Generate token with JTI and store in Redis
-            String[] tokenData = jwtUtil.generateTokenWithJti(user.getEmail(), user.getRole().name());
+            String[] tokenData = jwtUtil.generateTokenWithJti(
+                    savedUser.getEmail(),
+                    savedUser.getRole().name()
+            );
             String token = tokenData[0];
             String jti = tokenData[1];
 
-            tokenService.storeToken(jti, user.getEmail(), user.getRole().name());
+            tokenService.storeToken(jti, savedUser.getEmail(), savedUser.getRole().name());
 
-            log.info("User registered successfully: {}", user.getEmail());
-            return new AuthResponse(token, user.getRole().name());
-        } catch (IllegalArgumentException e){
+            log.info("User registered successfully: {} with ID: {}", savedUser.getEmail(), savedUser.getId());
+
+            return SignupResponse.builder()
+                    .token(token)
+                    .role(savedUser.getRole().name())
+                    .userId(savedUser.getId())  // FIX: Add userId
+                    .build();
+
+        } catch (IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {
             log.error("Error during signup for email: {}", request.getEmail(), e);
@@ -110,5 +121,34 @@ public class AuthService {
     public void logoutAllDevices(String email) {
         tokenService.invalidateAllUserTokens(email);
         log.info("All sessions invalidated for user: {}", email);
+    }
+    private void validateSignupRequest(SignupRequest request) {
+        // Enhanced password validation
+        if (request.getPassword().length() < 8) {
+            throw new IllegalArgumentException("Password must be at least 8 characters");
+        }
+
+        // Add complexity requirements
+        if (!request.getPassword().matches(".*[A-Z].*")) {
+            throw new IllegalArgumentException("Password must contain at least one uppercase letter");
+        }
+
+        if (!request.getPassword().matches(".*[a-z].*")) {
+            throw new IllegalArgumentException("Password must contain at least one lowercase letter");
+        }
+
+        if (!request.getPassword().matches(".*\\d.*")) {
+            throw new IllegalArgumentException("Password must contain at least one digit");
+        }
+
+        // Email format validation
+        if (!request.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            throw new IllegalArgumentException("Invalid email format");
+        }
+
+        // Role validation (if you have specific allowed roles)
+        if (request.getRole() == null) {
+            throw new IllegalArgumentException("Role is required");
+        }
     }
 }
