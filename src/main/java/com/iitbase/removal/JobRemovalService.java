@@ -1,6 +1,6 @@
 package com.iitbase.removal;
 
-import com.iitbase.job.JobService;
+import com.iitbase.community.service.CommunityJobService;
 import com.iitbase.user.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class JobRemovalService {
 
     private final JobRemovalRepository removalRepository;
-    private final JobService jobService;
+    private final CommunityJobService jobService;
 
     @Transactional
     public void requestRemoval(Long jobId, String requesterEmail, String reason, User user) {

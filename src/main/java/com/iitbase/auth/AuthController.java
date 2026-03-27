@@ -1,20 +1,16 @@
 package com.iitbase.auth;
 
-import com.iitbase.auth.dto.AuthResponse;
-import com.iitbase.auth.dto.LoginRequest;
-import com.iitbase.auth.dto.SignupRequest;
-import com.iitbase.auth.dto.SignupResponse;
+import com.iitbase.auth.dto.*;
 import com.iitbase.common.ApiResponse;
-import com.iitbase.email.OtpPurpose;
-import com.iitbase.email.OtpService;
-import com.iitbase.email.ResendOtpRequest;
+import com.iitbase.email.otp.OtpPurpose;
+import com.iitbase.email.otp.OtpService;
+import com.iitbase.email.otp.ResendOtpRequest;
 import com.iitbase.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -82,6 +78,48 @@ public class AuthController {
         authService.logoutAllDevices(email);
         return ResponseEntity.ok(ApiResponse.success(null, "Password reset successful"));
     }
+    @PostMapping("/change-email/request-otp")
+    public ResponseEntity<ApiResponse<Void>> requestChangeEmailOtp(
+            @RequestBody ChangeEmailRequest request,
+            Authentication authentication,
+            HttpServletRequest httpRequest) {
+
+        String currentEmail = authentication.getName();
+
+        if (userService.existsByEmail(request.getNewEmail())) {
+            throw new IllegalArgumentException("Email already in use");
+        }
+
+        String ipAddress = getClientIp(httpRequest);
+
+        otpService.generateAndSendOtp(
+                request.getNewEmail(),
+                OtpPurpose.CHANGE_EMAIL,
+                ipAddress
+        );
+
+        return ResponseEntity.ok(ApiResponse.success(null, "OTP sent to new email"));
+    }
+    @PostMapping("/change-email/verify")
+    public ResponseEntity<ApiResponse<Void>> verifyChangeEmail(
+            @RequestBody VerifyChangeEmailRequest request,
+            Authentication authentication) {
+
+        String currentEmail = authentication.getName();
+
+        otpService.validateOtp(
+                request.getNewEmail(),
+                request.getOtp(),
+                OtpPurpose.CHANGE_EMAIL
+        );
+
+        userService.updateEmail(currentEmail, request.getNewEmail());
+
+        // 🔥 CRITICAL: logout all sessions
+        authService.logoutAllDevices(currentEmail);
+
+        return ResponseEntity.ok(ApiResponse.success(null, "Email updated successfully"));
+    }
 
     @PostMapping("/resend-otp")
     public ResponseEntity<ApiResponse<Void>> resendOtp(
@@ -121,7 +159,6 @@ public class AuthController {
 
         throw new IllegalStateException("Invalid token - no JTI found");
     }
-
     /**
      * Logout all devices - invalidate all user tokens
      * Requires: Authorization: Bearer <token>
@@ -141,5 +178,28 @@ public class AuthController {
             ip = request.getRemoteAddr();
         }
         return ip != null ? ip.split(",")[0].trim() : "0.0.0.0";
+    }
+
+    @PostMapping("/change-email/verify-current/request-otp")
+    public ResponseEntity<ApiResponse<Void>> requestVerifyCurrentOtp(
+            Authentication authentication,
+            HttpServletRequest httpRequest) {
+
+        String currentEmail = authentication.getName();
+        String ipAddress = getClientIp(httpRequest);
+
+        otpService.generateAndSendOtp(currentEmail, OtpPurpose.VERIFY_CURRENT_EMAIL, ipAddress);
+
+        return ResponseEntity.ok(ApiResponse.success(null, "OTP sent to current email"));
+    }
+    @PostMapping("/change-email/verify-current")
+    public ResponseEntity<ApiResponse<Void>> verifyCurrentEmail(
+            @RequestParam String otp,
+            Authentication authentication) {
+
+        String currentEmail = authentication.getName();
+        otpService.validateOtp(currentEmail, otp, OtpPurpose.VERIFY_CURRENT_EMAIL);
+
+        return ResponseEntity.ok(ApiResponse.success(null, "Current email verified"));
     }
 }

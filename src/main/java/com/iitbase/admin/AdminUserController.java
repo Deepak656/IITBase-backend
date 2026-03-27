@@ -1,17 +1,15 @@
 package com.iitbase.admin;
 
+import com.iitbase.auth.TokenService;
 import com.iitbase.common.ApiResponse;
 import com.iitbase.user.User;
 import com.iitbase.user.UserRole;
-import com.iitbase.user.dto.UserResponse;
 import com.iitbase.user.UserRepository;
 import com.iitbase.user.UserService;
+import com.iitbase.user.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -28,41 +26,32 @@ import java.util.stream.Collectors;
 public class AdminUserController {
 
     private final UserRepository userRepository;
-    private final UserService userService;
+    private final UserService    userService;
+    private final TokenService   tokenService;    // ← inject properly
 
-    /**
-     * Get all users (paginated)
-     * GET /api/admin/users
-     */
     @GetMapping
     public ResponseEntity<ApiResponse<Page<UserResponse>>> getAllUsers(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "0")         int page,
+            @RequestParam(defaultValue = "20")        int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "DESC") String direction) {
+            @RequestParam(defaultValue = "DESC")      String direction) {
 
         Sort.Direction sortDirection = direction.equalsIgnoreCase("ASC")
-                ? Sort.Direction.ASC
-                : Sort.Direction.DESC;
+                ? Sort.Direction.ASC : Sort.Direction.DESC;
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
+        Pageable pageable = PageRequest.of(page, size,
+                Sort.by(sortDirection, sortBy));
         Page<User> users = userRepository.findAll(pageable);
 
-        Page<UserResponse> response = users.map(user -> UserResponse.builder()
-                .email(user.getEmail())
-                .role(user.getRole().name())
-                .college(user.getCollege())
-                .graduationYear(user.getGraduationYear())
-                .activeSessions(userService.getActiveSessionCount(user.getEmail()))
-                .build());
-
-        return ResponseEntity.ok(ApiResponse.success(response));
+        return ResponseEntity.ok(ApiResponse.success(users.map(user ->
+                UserResponse.builder()
+                        .email(user.getEmail())
+                        .role(user.getRole().name())
+                        .activeSessions(userService.getActiveSessionCount(user.getEmail()))
+                        .build()
+        )));
     }
 
-    /**
-     * Get users by role
-     * GET /api/admin/users/role/{role}
-     */
     @GetMapping("/role/{role}")
     public ResponseEntity<ApiResponse<List<UserResponse>>> getUsersByRole(
             @PathVariable String role) {
@@ -74,13 +63,11 @@ public class AdminUserController {
             throw new IllegalArgumentException("Invalid role: " + role);
         }
 
-        List<User> users = userRepository.findByRole(userRole);
-        List<UserResponse> response = users.stream()
+        List<UserResponse> response = userRepository.findByRole(userRole)
+                .stream()
                 .map(user -> UserResponse.builder()
                         .email(user.getEmail())
                         .role(user.getRole().name())
-                        .college(user.getCollege())
-                        .graduationYear(user.getGraduationYear())
                         .activeSessions(userService.getActiveSessionCount(user.getEmail()))
                         .build())
                 .collect(Collectors.toList());
@@ -88,66 +75,38 @@ public class AdminUserController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    /**
-     * Get user statistics
-     * GET /api/admin/users/stats
-     */
     @GetMapping("/stats")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getUserStats() {
-        long totalUsers = userRepository.count();
-        long admins = userRepository.countByRole(UserRole.ADMIN);
-        long recruiters = userRepository.countByRole(UserRole.RECRUITER);
-        long jobSeekers = userRepository.countByRole(UserRole.JOB_SEEKER);
-
-        Map<String, Object> stats = Map.of(
-                "totalUsers", totalUsers,
-                "admins", admins,
-                "recruiters", recruiters,
-                "jobSeekers", jobSeekers
-        );
-
-        return ResponseEntity.ok(ApiResponse.success(stats));
+        return ResponseEntity.ok(ApiResponse.success(Map.of(
+                "totalUsers", userRepository.count(),
+                "admins",     userRepository.countByRole(UserRole.ADMIN),
+                "recruiters", userRepository.countByRole(UserRole.RECRUITER),
+                "jobSeekers", userRepository.countByRole(UserRole.JOB_SEEKER)
+        )));
     }
 
-    /**
-     * Get user by email
-     * GET /api/admin/users/{email}
-     */
     @GetMapping("/{email}")
-    public ResponseEntity<ApiResponse<UserResponse>> getUserByEmail(@PathVariable String email) {
+    public ResponseEntity<ApiResponse<UserResponse>> getUserByEmail(
+            @PathVariable String email) {
         UserResponse user = userService.getUserProfile(email);
         user.setActiveSessions(userService.getActiveSessionCount(email));
-
         return ResponseEntity.ok(ApiResponse.success(user));
     }
 
-    /**
-     * Force logout user (invalidate all sessions)
-     * POST /api/admin/users/{email}/force-logout
-     */
+    // ── Fixed: inject TokenService via constructor, not manual instantiation ──
     @PostMapping("/{email}/force-logout")
     public ResponseEntity<ApiResponse<Void>> forceLogout(@PathVariable String email) {
-        userService.findByEmail(email); // Verify user exists
-
-        // Invalidate all user sessions
-        com.iitbase.auth.TokenService tokenService =
-                new com.iitbase.auth.TokenService(null, null); // This needs proper injection
+        userService.findByEmail(email);             // verify exists
         tokenService.invalidateAllUserTokens(email);
-
         log.warn("Admin force-logged out user: {}", email);
         return ResponseEntity.ok(ApiResponse.success(null,
-                "All sessions invalidated for user: " + email));
+                "All sessions invalidated for: " + email));
     }
 
-    /**
-     * Delete user (admin only)
-     * DELETE /api/admin/users/{email}
-     */
     @DeleteMapping("/{email}")
     public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable String email) {
         userService.deleteAccount(email);
-
-        log.warn("Admin deleted user account: {}", email);
-        return ResponseEntity.ok(ApiResponse.success(null, "User deleted successfully"));
+        log.warn("Admin deleted user: {}", email);
+        return ResponseEntity.ok(ApiResponse.success(null, "User deleted"));
     }
 }

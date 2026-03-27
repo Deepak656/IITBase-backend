@@ -22,8 +22,7 @@ public class JobPreferenceDTO {
     private String currentLocation;
 
     @Size(max = 50)
-    private String workLocationType;
-    // Example: REMOTE, HYBRID, ONSITE
+    private String workLocationType;  // REMOTE, HYBRID, ONSITE
 
     private List<String> preferredCities;
 
@@ -33,6 +32,17 @@ public class JobPreferenceDTO {
     @Size(max = 10)
     private String previousSalaryCurrency;
 
+    @DecimalMin(value = "0.0", inclusive = true)
+    private BigDecimal expectedSalary;
+
+    @Size(max = 10)
+    private String expectedSalaryCurrency;
+
     @Size(max = 50)
-    private String noticePeriod;
+    private String noticePeriod;  // IMMEDIATE, 15_DAYS, 30_DAYS, 60_DAYS, 90_DAYS
+
+    @Size(max = 100)
+    private String primaryRole;  // BACKEND, FRONTEND, FULLSTACK, DATA, DEVOPS
+
+    private List<String> openToRoles;  // secondary roles
 }

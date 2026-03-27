@@ -12,14 +12,8 @@ public class SignupRequest {
     @NotBlank
     @Email
     private String email;
-
     @NotBlank
     private String password;
-
     @NotNull
     private UserRole role;
-
-    private String college;
-
-    private Integer graduationYear;
 }

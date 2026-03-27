@@ -1,12 +1,9 @@
 package com.iitbase.user;
 
 import com.iitbase.auth.TokenService;
-import com.iitbase.user.dto.UpdateProfileRequest;
 import com.iitbase.user.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,7 +17,6 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
-
     public User findByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
@@ -48,26 +44,6 @@ public class UserService {
         tokenService.invalidateAllUserTokens(email);
 
         log.info("Password updated for user: {}", email);
-    }
-
-    /**
-     * Update user profile
-     */
-    @Transactional
-    public UserResponse updateProfile(String email, UpdateProfileRequest request) {
-        User user = findByEmail(email);
-
-        if (request.getCollege() != null) {
-            user.setCollege(request.getCollege());
-        }
-        if (request.getGraduationYear() != null) {
-            user.setGraduationYear(request.getGraduationYear());
-        }
-
-        userRepository.save(user);
-        log.info("Profile updated for user: {}", email);
-
-        return mapToResponse(user);
     }
 
     /**
@@ -133,8 +109,20 @@ public class UserService {
         return UserResponse.builder()
                 .email(user.getEmail())
                 .role(user.getRole().name())
-                .college(user.getCollege())
-                .graduationYear(user.getGraduationYear())
                 .build();
+    }
+    @Transactional
+    public void updateEmail(String currentEmail, String newEmail) {
+        User user = userRepository.findByEmail(currentEmail)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (userRepository.existsByEmail(newEmail)) {
+            throw new IllegalArgumentException("Email already in use");
+        }
+
+        user.setEmail(newEmail);
+        userRepository.save(user);
+        // Invalidate all sessions except current (optional - for now invalidate all)
+        tokenService.invalidateAllUserTokens(currentEmail);
     }
 }

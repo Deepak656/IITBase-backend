@@ -20,7 +20,7 @@ jwt:
 sendgrid:
   api:
     key: ${SENDGRID_API_KEY}
-  from-email: hello@iitbase.com
+  from-email: ${SENDGRID_FROM_EMAIL:hello@iitbase.com}
 
 logging:
   level:

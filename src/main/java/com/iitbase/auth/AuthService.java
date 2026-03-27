@@ -5,11 +5,15 @@ import com.iitbase.auth.dto.LoginRequest;
 import com.iitbase.auth.dto.SignupRequest;
 import com.iitbase.auth.dto.SignupResponse;
 import com.iitbase.config.JwtUtil;
+import com.iitbase.email.event.JobseekerWelcomeEvent;
+import com.iitbase.jobseeker.service.JobseekerProfileService;
 import com.iitbase.user.User;
 import com.iitbase.user.UserRepository;
+import com.iitbase.user.UserRole;
 import com.iitbase.user.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,15 +28,17 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
     private final TokenService tokenService;
+    private final JobseekerProfileService jobseekerProfileService;
 
     @Transactional
     public SignupResponse signup(SignupRequest request) {
         log.info("Signup attempt for email: {}", request.getEmail());
 
         // Validate input first
-//        validateSignupRequest(request);
+        // validateSignupRequest(request);
 
         try {
+            log.info("SignupRequest Body: {}", request);
             // Check if email exists
             if (userService.existsByEmail(request.getEmail())) {
                 log.warn("Signup failed - email already exists: {}", request.getEmail());
@@ -44,11 +50,18 @@ public class AuthService {
                     .email(request.getEmail())
                     .password(passwordEncoder.encode(request.getPassword()))
                     .role(request.getRole())
-                    .college(request.getCollege())
-                    .graduationYear(request.getGraduationYear())
                     .build();
 
             User savedUser = userService.save(user);
+            // Create jobseeker profile immediately if role is JOBSEEKER
+            if (savedUser.getRole() == UserRole.JOB_SEEKER) {
+                log.info("Save jobseeker profile");
+                jobseekerProfileService.getOrCreateProfile(savedUser.getEmail());
+            }
+            if (savedUser.getRole() == UserRole.RECRUITER) {
+                log.info("Save recruiter profile - Pending work");
+//                recruiterProfileService.getOrCreateProfile(savedUser.getEmail());
+            }
 
             // Generate token with JTI and store in Redis
             String[] tokenData = jwtUtil.generateTokenWithJti(

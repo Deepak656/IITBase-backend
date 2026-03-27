@@ -1,5 +1,6 @@
 package com.iitbase.config;
 
+import io.netty.handler.codec.http.HttpMethod;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -27,15 +28,41 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> {})
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/public/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/recruiter/**").hasRole("RECRUITER")
-                        .requestMatchers("/api/jobs/**").authenticated()
+
+                        // 🔓 PUBLIC (no auth required)
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/api/public/**",
+                                "/api/jobs/**",          // job listings should be public
+                                "/api/companies/**"      // public company profiles
+                        ).permitAll()
+                        // Admin staff invite and accept public url
+                        .requestMatchers("/api/admin/staff/invite/validate").permitAll()
+                        .requestMatchers("/api/admin/staff/invite/accept").permitAll()
+                        // 👤 AUTHENTICATED USERS (any logged-in user)
+                        .requestMatchers(
+                                "/api/user/**"
+                        ).authenticated()
+
+                        // 🎓 JOB SEEKER
+                        .requestMatchers(
+                                "/api/applications/**"
+                        ).hasRole("JOB_SEEKER")
+
+                        // 🏢 RECRUITER
+                        .requestMatchers(
+                                "/api/recruiter/**",
+                                "/api/v1/recruiters/**",
+                                "/api/v1/companies/**"
+                        ).hasRole("RECRUITER")
+
+                        // 🛠 ADMIN
+                        .requestMatchers(
+                                "/api/admin/**"
+                        ).hasRole("ADMIN")
+
+                        // 🔒 Everything else
                         .anyRequest().authenticated()
-                )
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .addFilterBefore(
                         jwtAuthenticationFilter,

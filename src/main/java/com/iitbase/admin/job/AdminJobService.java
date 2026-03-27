@@ -1,9 +1,9 @@
 package com.iitbase.admin.job;
 
-import com.iitbase.job.Job;
-import com.iitbase.job.JobRepository;
-import com.iitbase.job.JobStatus;
-import com.iitbase.job.dto.JobResponse;
+import com.iitbase.community.entity.CommunityJob;
+import com.iitbase.community.repository.CommunityJobRepository;
+import com.iitbase.community.enums.JobStatus;
+import com.iitbase.community.dto.JobResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminJobService {
 
-    private final JobRepository jobRepository;
+    private final CommunityJobRepository jobRepository;
 
     public List<JobResponse> getPendingJobs() {
         return jobRepository.findByStatusOrderByCreatedAtAsc(JobStatus.PENDING)
@@ -35,7 +35,7 @@ public class AdminJobService {
 
     @Transactional
     public void approveJob(Long id) {
-        Job job = findJob(id);
+        CommunityJob job = findJob(id);
         job.setStatus(JobStatus.APPROVED);
         jobRepository.save(job);
         log.info("Job {} approved", id);
@@ -43,7 +43,7 @@ public class AdminJobService {
 
     @Transactional
     public void rejectJob(Long id) {
-        Job job = findJob(id);
+        CommunityJob job = findJob(id);
         job.setStatus(JobStatus.REJECTED);
         jobRepository.save(job);
         log.info("Job {} rejected", id);
@@ -51,18 +51,18 @@ public class AdminJobService {
 
     @Transactional
     public void markExpired(Long id) {
-        Job job = findJob(id);
+        CommunityJob job = findJob(id);
         job.setStatus(JobStatus.EXPIRED);
         jobRepository.save(job);
         log.info("Job {} marked expired", id);
     }
 
-    private Job findJob(Long id) {
+    private CommunityJob findJob(Long id) {
         return jobRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Job not found"));
     }
 
-    private JobResponse toResponse(Job job) {
+    private JobResponse toResponse(CommunityJob job) {
         return JobResponse.builder()
                 .id(job.getId())
                 .title(job.getTitle())
@@ -73,7 +73,9 @@ public class AdminJobService {
                 .sourceUrl(job.getSourceUrl())
                 .minExperience(job.getMinExperience())
                 .maxExperience(job.getMaxExperience())
-                .primaryRole(job.getPrimaryRole())
+                .jobDomain(job.getJobDomain())       // replaces primaryRole
+                .techRole(job.getTechRole())          // new
+                .roleTitle(job.getRoleTitle())        // new
                 .techStack(job.getTechStack())
                 .skills(job.getSkills())
                 .tierOneReason(job.getTierOneReason())

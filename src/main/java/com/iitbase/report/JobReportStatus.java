@@ -6,5 +6,4 @@ public enum JobReportStatus {
     READ,
     DECISION_PENDING,
     JOB_REMOVED,
-
 }

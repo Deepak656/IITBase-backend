@@ -13,6 +13,20 @@ spring:
   sql:
     init:
       mode: always
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+  flyway:
+    enabled: false
+    baseline-on-migrate: false
+  task:
+    execution:
+       pool:
+         core-size: 2
+         max-size: 5
+         queue-capacity: 100
+       thread-name-prefix: async-
 
 server:
   port: ${PORT:8080}
@@ -21,6 +35,9 @@ server:
 
 app:
   report-threshold: 3
+  base-url: https://iitbase.com
+  admin:
+    seed-email: ${ADMIN_SEED_EMAIL}
 bucket4j:
   enabled: true
   filters:
@@ -31,3 +48,35 @@ bucket4j:
             - capacity: 10
               time: 1
               unit: hours
+
+# Email provider — swap this one value to change vendor
+# Supported: resend | brevo | sendgrid
+email:
+  provider: resend
+  from: ${FROM_EMAIL:hello@iitbase.com}
+  enabled: ${EMAIL_ENABLED:true}
+  otp-enabled: ${EMAIL_OTP_ENABLED:true}
+  events-enabled: ${EMAIL_EVENTS_ENABLED:true}
+# Resend (active)
+resend:
+  api-key: ${RESEND_API_KEY}
+
+# Brevo (standby — uncomment when needed)
+# brevo:
+#   api-key: ${BREVO_API_KEY}
+
+# SendGrid (legacy)
+# sendgrid:
+#   api-key: ${SENDGRID_API_KEY}
+
+# Sender identity — shared across all providers
+sendgrid:
+  from-email: hello@iitbase.com
+
+r2:
+  account-id: ${R2_ACCOUNT_ID}
+  access-key: ${R2_ACCESS_KEY}
+  secret-key: ${R2_SECRET_KEY}
+  bucket: ${R2_BUCKET:iitbase-uploads}
+  public-url: ${R2_PUBLIC_URL}   # e.g. https://pub-xxxx.r2.dev  (from R2 bucket settings)
+

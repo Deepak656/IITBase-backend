@@ -23,6 +23,9 @@ public class JobReport extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String comment;
 
+    @Column(columnDefinition = "TEXT")
+    private String resolution;
+
     @Column(nullable = false)
     private Long reportedBy;
 

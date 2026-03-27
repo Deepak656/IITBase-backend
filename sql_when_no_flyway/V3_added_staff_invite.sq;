@@ -1,0 +1,18 @@
+CREATE TABLE IF NOT EXISTS staff_invites (
+    id                    BIGSERIAL PRIMARY KEY,
+    created_at            TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at            TIMESTAMP,
+
+    token                 VARCHAR(255) NOT NULL UNIQUE,
+    email                 VARCHAR(255) NOT NULL UNIQUE,
+    invited_by_user_id    BIGINT       NOT NULL,
+    invited_by_email      VARCHAR(255) NOT NULL,
+    status                VARCHAR(20)  NOT NULL DEFAULT 'PENDING',
+    expires_at            TIMESTAMP    NOT NULL,
+    accepted_at           TIMESTAMP,
+    accepted_by_user_id   BIGINT
+);
+
+CREATE INDEX IF NOT EXISTS idx_staff_invites_token  ON staff_invites(token);
+CREATE INDEX IF NOT EXISTS idx_staff_invites_email  ON staff_invites(email);
+CREATE INDEX IF NOT EXISTS idx_staff_invites_status ON staff_invites(status);

@@ -22,13 +22,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
     long countByRole(UserRole role);
 
     Page<User> findAll(Pageable pageable);
-
-    @Query("SELECT u FROM User u WHERE u.college = :college")
-    List<User> findByCollege(@Param("college") String college);
-
-    @Query("SELECT u FROM User u WHERE u.graduationYear = :year")
-    List<User> findByGraduationYear(@Param("year") Integer year);
-
-    @Query("SELECT u FROM User u WHERE u.role = :role AND u.college = :college")
-    List<User> findByRoleAndCollege(@Param("role") UserRole role, @Param("college") String college);
 }

@@ -12,7 +12,5 @@ import lombok.NoArgsConstructor;
 public class UserResponse {
     private String email;
     private String role;
-    private String college;
-    private Integer graduationYear;
     private Long activeSessions;
 }

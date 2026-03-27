@@ -1,7 +1,7 @@
 package com.iitbase.admin.job;
 
 import com.iitbase.common.ApiResponse;
-import com.iitbase.job.dto.JobResponse;
+import com.iitbase.community.dto.JobResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

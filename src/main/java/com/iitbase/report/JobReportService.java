@@ -1,8 +1,8 @@
 package com.iitbase.report;
 
-import com.iitbase.job.Job;
-import com.iitbase.job.JobService;
-import com.iitbase.job.JobStatus;
+import com.iitbase.community.entity.CommunityJob;
+import com.iitbase.community.service.CommunityJobService;
+import com.iitbase.community.enums.JobStatus;
 import com.iitbase.user.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,14 +16,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class JobReportService {
 
     private final JobReportRepository reportRepository;
-    private final JobService jobService;
+    private final CommunityJobService jobService;
 
     @Value("${app.report-threshold:3}")
     private int reportThreshold;
 
     @Transactional
     public void reportJob(Long jobId, ReportReason reason, String comment, User user) {
-        Job job = jobService.findById(jobId);
+        CommunityJob job = jobService.findById(jobId);
 
         JobReport report = JobReport.builder()
                 .jobId(jobId)

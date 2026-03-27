@@ -2,7 +2,6 @@ package com.iitbase.user;
 
 import com.iitbase.common.ApiResponse;
 import com.iitbase.user.dto.ChangePasswordRequest;
-import com.iitbase.user.dto.UpdateProfileRequest;
 import com.iitbase.user.dto.UserResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,21 +34,6 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(user));
     }
 
-    /**
-     * Update user profile
-     * PUT /api/user/profile
-     */
-    @PutMapping("/profile")
-    public ResponseEntity<ApiResponse<UserResponse>> updateProfile(
-            @Valid @RequestBody UpdateProfileRequest request,
-            Authentication authentication) {
-
-        String email = authentication.getName();
-        UserResponse updatedUser = userService.updateProfile(email, request);
-
-        log.info("Profile updated for user: {}", email);
-        return ResponseEntity.ok(ApiResponse.success(updatedUser, "Profile updated successfully"));
-    }
 
     /**
      * Change password
