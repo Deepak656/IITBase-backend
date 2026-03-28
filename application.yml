@@ -5,7 +5,7 @@ spring:
     name: iitbase-backend
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     show-sql: false
     properties:
       hibernate:
