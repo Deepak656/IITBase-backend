@@ -10,10 +10,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -22,6 +25,7 @@ public class AuthController {
     private final AuthService authService;
     private final UserService userService;
     private final OtpService otpService;
+    private final RedisTemplate redisTemplate;
 
     @PostMapping("/signup/request-otp")
     public ResponseEntity<ApiResponse<Void>> requestSignupOtp(
@@ -201,5 +205,16 @@ public class AuthController {
         otpService.validateOtp(currentEmail, otp, OtpPurpose.VERIFY_CURRENT_EMAIL);
 
         return ResponseEntity.ok(ApiResponse.success(null, "Current email verified"));
+    }
+
+    @GetMapping("/auth/health/redis")
+    public ResponseEntity<String> redisHealth() {
+        try {
+            redisTemplate.opsForValue().get("ping");
+            return ResponseEntity.ok("Redis OK");
+        } catch (Exception e) {
+            log.error("Redis health check failed", e);
+            return ResponseEntity.status(503).body("Redis DOWN: " + e.getMessage());
+        }
     }
 }

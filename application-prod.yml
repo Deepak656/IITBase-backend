@@ -10,9 +10,14 @@ spring:
       host: ${REDISHOST:redis.iitbase.com}
       port: ${REDISPORT:6379}
       password: ${REDISPASSWORD}
+      connect-timeout: 2000
       ssl:
         enabled: false # Redis has no ssl, that's for upstash
-      timeout: 5000
+      timeout: 2000
+  redis:
+    lettuce:
+      pool:
+        enabled: true
 
 jwt:
   secret: ${JWT_SECRET} # Must be a long, secure string

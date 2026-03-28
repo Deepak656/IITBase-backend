@@ -15,7 +15,11 @@ public class NotificationRedisService {
     private static final String KEY_PREFIX = "notif:unread:";
 
     public void increment(Long userId) {
-        redisTemplate.opsForValue().increment(KEY_PREFIX + userId);
+        try {
+            redisTemplate.opsForValue().increment(KEY_PREFIX + userId);
+        } catch (Exception e) {
+            log.warn("Redis unavailable, skipping rate limit");
+        }
     }
 
     public void decrement(Long userId) {
@@ -47,7 +51,12 @@ public class NotificationRedisService {
     }
 
     private Long getCurrentCount(Long userId) {
-        String value = redisTemplate.opsForValue().get(KEY_PREFIX + userId);
+        String value = "";
+        try {
+            value = redisTemplate.opsForValue().get(KEY_PREFIX + userId);
+        } catch (Exception e) {
+            log.warn("Redis unavailable, skipping rate limit");
+        }
         return value != null ? Long.parseLong(value) : null;
     }
 }

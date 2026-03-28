@@ -32,21 +32,27 @@ public class OtpRateLimitService {
      */
     public void checkIpRateLimit(String ipAddress) {
         String key = "otp:ratelimit:ip:" + ipAddress;
-        String countStr = redisTemplate.opsForValue().get(key);
-        int count = countStr != null ? Integer.parseInt(countStr) : 0;
 
-        if (count >= MAX_OTP_REQUESTS_PER_WINDOW) {
-            log.warn("OTP rate limit hit for IP: {} ({} requests in last 15 min)", ipAddress, count);
-            throw new IllegalArgumentException(
-                    "Too many OTP requests. Please wait 15 minutes before trying again."
-            );
-        }
+        try {
+            String countStr = redisTemplate.opsForValue().get(key); // ← was unguarded!
+            int count = countStr != null ? Integer.parseInt(countStr) : 0;
 
-        // Increment and (re-)set TTL so the window slides from first request
-        Long newCount = redisTemplate.opsForValue().increment(key);
-        if (newCount != null && newCount == 1) {
-            // First request in this window — anchor the expiry
-            redisTemplate.expire(key, WINDOW_DURATION);
+            if (count >= MAX_OTP_REQUESTS_PER_WINDOW) {
+                log.warn("OTP rate limit hit for IP: {}", ipAddress);
+                throw new IllegalArgumentException(
+                        "Too many OTP requests. Please wait 15 minutes before trying again."
+                );
+            }
+
+            Long newCount = redisTemplate.opsForValue().increment(key);
+            if (newCount != null && newCount == 1) {
+                redisTemplate.expire(key, WINDOW_DURATION);
+            }
+        } catch (IllegalArgumentException e) {
+            throw e; // re-throw rate limit hits, don't swallow them
+        } catch (Exception e) {
+            log.warn("Redis unavailable — skipping OTP rate limit for IP: {}", ipAddress);
+            // fail open: let the request through
         }
     }
 }

@@ -9,8 +9,12 @@ spring:
     redis:
       host: ${REDISHOST:localhost}
       port: ${REDISPORT:6379}
-      timeout: 60000
-
+      timeout: 2000
+      connect-timeout: 2000
+  redis:
+    lettuce:
+      pool:
+        enabled: true
 jwt:
   secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION:86400000}
