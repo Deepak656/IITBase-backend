@@ -7,7 +7,7 @@ spring:
 
   data:
     redis:
-      host: ${REDISHOST:redis.iitbase.com}
+      host: ${REDISHOST:redis.railway.internal}
       port: ${REDISPORT:6379}
       password: ${REDISPASSWORD}
       connect-timeout: 2000
