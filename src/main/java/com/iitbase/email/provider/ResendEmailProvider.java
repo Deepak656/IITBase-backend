@@ -28,7 +28,7 @@ public class ResendEmailProvider implements EmailProvider {
 
     public ResendEmailProvider(
             @Value("${resend.api-key:placeholder-not-set}") String apiKey,
-            @Value("${email.from}") String fromEmail  // reuse same property, same sender
+            @Value("${email.from:hello@iitbase.com}") String fromEmail  // reuse same property, same sender
     ) {
         this.fromEmail = fromEmail;
         this.webClient = WebClient.builder()

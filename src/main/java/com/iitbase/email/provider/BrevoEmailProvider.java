@@ -30,7 +30,7 @@ public class BrevoEmailProvider implements EmailProvider {
 
     public BrevoEmailProvider(
             @Value("${brevo.api-key:placeholder-not-set}") String apiKey,
-            @Value("${email.from}") String fromEmail
+            @Value("${email.from:hello@iitbase.com}") String fromEmail
     ) {
         this.fromEmail = fromEmail;
         this.webClient = WebClient.builder()

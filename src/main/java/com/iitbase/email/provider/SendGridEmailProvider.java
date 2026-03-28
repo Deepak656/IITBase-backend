@@ -26,7 +26,7 @@ public class SendGridEmailProvider implements EmailProvider {
 
     private final SendGrid sendGrid;
 
-    @Value("${email.from}")
+    @Value("${email.from:hello@iitbase.com}")
     private String fromEmail;
 
     @Override

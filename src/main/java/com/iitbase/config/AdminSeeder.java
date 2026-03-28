@@ -41,7 +41,7 @@ public class AdminSeeder implements ApplicationRunner {
     private final UserRepository  userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Value("${app.admin.seed-email:}")
+    @Value("${app.admin.seed-email:deepak01962@gmail.com}")
     private String seedEmail;
 
     @Override
