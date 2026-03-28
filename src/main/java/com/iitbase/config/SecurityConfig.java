@@ -35,7 +35,8 @@ public class SecurityConfig {
                                 "/api/public/**",
                                 "/api/jobs/**",          // job listings should be public
                                 "/api/companies/**",      // public company profiles
-                                "/api/auth/health/redis" // redis health check
+                                "/api/auth/health/redis", // redis health check
+                                "/actuator/**"
                         ).permitAll()
                         // Admin staff invite and accept public url
                         .requestMatchers("/api/admin/staff/invite/validate").permitAll()

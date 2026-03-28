@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: prod
+    active: ${ACTIVE_PROFILE:prod}
   application:
     name: iitbase-backend
   jpa:
@@ -68,3 +68,18 @@ r2:
   bucket: ${R2_BUCKET:iitbase-uploads}
   public-url: ${R2_PUBLIC_URL}   # e.g. https://pub-xxxx.r2.dev  (from R2 bucket settings)
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true   # optional (for k8s readiness/liveness)
+  health:
+    redis:
+      enabled: true
+    db:
+      enabled: true
