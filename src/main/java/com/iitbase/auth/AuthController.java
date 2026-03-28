@@ -207,7 +207,7 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success(null, "Current email verified"));
     }
 
-    @GetMapping("/auth/health/redis")
+    @GetMapping("/health/redis")
     public ResponseEntity<String> redisHealth() {
         try {
             redisTemplate.opsForValue().get("ping");
