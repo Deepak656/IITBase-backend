@@ -16,6 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/auth")
@@ -216,5 +219,13 @@ public class AuthController {
             log.error("Redis health check failed", e);
             return ResponseEntity.status(503).body("Redis DOWN: " + e.getMessage());
         }
+    }
+    @GetMapping("/health/redis-debug")
+    public ResponseEntity<Map<String, String>> redisDebug() {
+        Map<String, String> info = new LinkedHashMap<>();
+        info.put("REDISHOST", System.getenv("REDISHOST"));
+        info.put("REDISPORT", System.getenv("REDISPORT"));
+        info.put("REDISPASSWORD_SET", System.getenv("REDISPASSWORD") != null ? "YES (len=" + System.getenv("REDISPASSWORD").length() + ")" : "NOT SET");
+        return ResponseEntity.ok(info);
     }
 }
