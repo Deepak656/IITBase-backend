@@ -15,14 +15,22 @@ jwt:
   secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION:86400000}
 
+# Sendgrid
 sendgrid:
   api:
     key: ${SENDGRID_API_KEY}
   from-email: ${FROM_EMAIL:hello@iitbase.com}
+# Resend (active)
+resend:
+  api-key: ${RESEND_API_KEY}
+# Email provider — swap this one value to change vendor
+# Supported: resend | brevo | sendgrid
 email:
-  enabled: false
-  otp-enabled: false
-  events-enabled: false
+  provider: resend
+  from: ${FROM_EMAIL:hello@iitbase.com}
+  enabled: ${EMAIL_ENABLED:true}
+  otp-enabled: ${EMAIL_OTP_ENABLED:true}
+  events-enabled: ${EMAIL_EVENTS_ENABLED:true}
 logging:
   level:
     com:

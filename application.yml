@@ -49,18 +49,6 @@ bucket4j:
               time: 1
               unit: hours
 
-# Email provider — swap this one value to change vendor
-# Supported: resend | brevo | sendgrid
-email:
-  provider: resend
-  from: ${FROM_EMAIL:hello@iitbase.com}
-  enabled: ${EMAIL_ENABLED:true}
-  otp-enabled: ${EMAIL_OTP_ENABLED:true}
-  events-enabled: ${EMAIL_EVENTS_ENABLED:true}
-# Resend (active)
-resend:
-  api-key: ${RESEND_API_KEY}
-
 # Brevo (standby — uncomment when needed)
 # brevo:
 #   api-key: ${BREVO_API_KEY}
