@@ -8,8 +8,6 @@ spring:
   data:
     redis:
       url: ${SPRING_REDIS_URL}
-      connect-timeout: 2000
-      timeout: 2000
   redis:
     lettuce:
       pool:
