@@ -11,7 +11,7 @@ spring:
       connect-timeout: 2000
       timeout: 2000
       ssl:
-        enabled: false
+        enabled: true
 
   redis:
     lettuce:

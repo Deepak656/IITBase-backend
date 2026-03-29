@@ -13,20 +13,25 @@ public class RedisConfig {
 
     @Bean
     public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory factory) {
-        // Eagerly test the connection so startup logs tell you immediately
-        // whether Redis is reachable — instead of finding out on the first request.
+
+        // 🔍 Test connection at startup
         try {
-            factory.getConnection().ping();
-            log.info("Redis connection established successfully");
+            String pong = factory.getConnection().ping();
+            log.info("✅ Redis connected successfully: {}", pong);
         } catch (Exception e) {
-            log.error("Redis connection FAILED at startup — check REDISHOST/REDISPORT/REDISPASSWORD env vars. Error: {}", e.getMessage());
-            // Not throwing — app boots, falls back to stateless JWT per our filter logic
+            log.error("❌ Redis connection FAILED. Check Upstash URL / SSL. Error: {}", e.getMessage());
         }
 
         RedisTemplate<String, String> template = new RedisTemplate<>();
         template.setConnectionFactory(factory);
+
+        // 🔥 Important serializers
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new StringRedisSerializer());
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(new StringRedisSerializer());
+
+        template.afterPropertiesSet();
         return template;
     }
 }
