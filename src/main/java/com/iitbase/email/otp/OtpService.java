@@ -79,7 +79,7 @@ public class OtpService {
 
         // 6️⃣ Send email (sync recommended)
         try {
-//            emailService.sendOtp(email, otp, purpose);
+            emailService.sendOtp(email, otp, purpose);
             log.info("OTP is for testing {}",otp ); // remove comments in production
             log.info("OTP sent successfully to: {} for purpose: {}", email, purpose);
         } catch (Exception e) {

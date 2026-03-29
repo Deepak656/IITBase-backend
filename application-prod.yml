@@ -7,7 +7,7 @@ spring:
 
   data:
     redis:
-      url: ${REDIS_URL}
+      url: ${SPRING_REDIS_URL}
       connect-timeout: 2000
       timeout: 2000
       ssl:
