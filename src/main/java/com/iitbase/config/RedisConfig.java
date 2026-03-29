@@ -21,7 +21,7 @@ public class RedisConfig {
         redisConfig.setHostName("relaxed-airedale-87540.upstash.io");
         redisConfig.setPort(6379);
         redisConfig.setUsername("default");
-        redisConfig.setPassword("gQAAAAAAAVX0AAIncDJmMzEwOGViYzJmMTg0YjFkOTY1ZGJjYmYxNjA2MDQxNHAyODc1ND"); // 🔴 put real password here
+        redisConfig.setPassword("gQAAAAAAAVX0AAIncDJmMzEwOGViYzJmMTg0YjFkOTY1ZGJjYmYxNjA2MDQxNHAyODc1NDA"); // 🔴 put real password here
 
         LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
                 .useSsl()
