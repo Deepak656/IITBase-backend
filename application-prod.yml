@@ -1,4 +1,3 @@
-#application-prod.yml
 spring:
   datasource:
     url: jdbc:postgresql://${PGHOST}:${PGPORT:5432}/${PGDATABASE}
@@ -8,37 +7,32 @@ spring:
 
   data:
     redis:
-      host: ${REDISHOST:redis.railway.internal}
-      port: ${REDISPORT:6379}
-      password: ${REDISPASSWORD}
+      url: ${REDIS_URL}
       connect-timeout: 2000
-      ssl:
-        enabled: false # Redis has no ssl, that's for upstash
       timeout: 2000
+      ssl:
+        enabled: false
+
   redis:
     lettuce:
       pool:
         enabled: true
 
 jwt:
-  secret: ${JWT_SECRET} # Must be a long, secure string
+  secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION:86400000}
-
-sendgrid:
-  api:
-    key: ${SENDGRID_API_KEY}
-  from-email: ${SENDGRID_FROM_EMAIL:hello@iitbase.com}
 
 logging:
   level:
     com.iitbase: INFO
     org.springframework.security: WARN
+
 email:
   provider: resend
   from: ${FROM_EMAIL:hello@iitbase.com}
   enabled: ${EMAIL_ENABLED:true}
   otp-enabled: ${EMAIL_OTP_ENABLED:true}
   events-enabled: ${EMAIL_EVENTS_ENABLED:true}
-# Resend (active)
+
 resend:
   api-key: ${RESEND_API_KEY}
