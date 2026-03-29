@@ -55,7 +55,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String jti = jwtUtil.extractJti(token);
             if (jti == null || !tokenService.isTokenValid(jti)) {
                 log.warn("Token not in Redis whitelist - JTI: {}", jti);
-                log.warn("Timestamp for - Token not in Redis whitelist : {}", LocalDateTime.now());
                 filterChain.doFilter(request, response);
                 return;
             }
