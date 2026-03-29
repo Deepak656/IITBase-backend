@@ -26,6 +26,16 @@ public class TokenService {
     /**
      * Store token in Redis after login
      */
+    public TokenValidationResult checkToken(String jti) {
+        try {
+            String key = TOKEN_PREFIX + jti;
+            Boolean exists = redisTemplate.hasKey(key);
+            return Boolean.TRUE.equals(exists) ? TokenValidationResult.VALID : TokenValidationResult.INVALID;
+        } catch (Exception e) {
+            log.warn("Redis unavailable during token check - falling back to stateless JWT for JTI: {}", jti);
+            return TokenValidationResult.REDIS_UNAVAILABLE;
+        }
+    }
     public void storeToken(String jti, String email, String role) {
         try {
             String key = TOKEN_PREFIX + jti;
@@ -48,21 +58,6 @@ public class TokenService {
         } catch (Exception e) {
             log.error("Failed to store token in Redis", e);
             // Don't fail the login - fallback to stateless JWT
-        }
-    }
-
-    /**
-     * Validate token exists in Redis
-     */
-    public boolean isTokenValid(String jti) {
-        try {
-            String key = TOKEN_PREFIX + jti;
-            Boolean exists = redisTemplate.hasKey(key);
-            return Boolean.TRUE.equals(exists);
-        } catch (Exception e) {
-            log.error("Failed to check token in Redis", e);
-            // Fallback: allow if Redis is down (or return false for strict security)
-            return false;
         }
     }
 

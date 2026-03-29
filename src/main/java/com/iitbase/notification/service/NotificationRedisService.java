@@ -11,52 +11,58 @@ import org.springframework.stereotype.Service;
 public class NotificationRedisService {
 
     private final StringRedisTemplate redisTemplate;
-
     private static final String KEY_PREFIX = "notif:unread:";
 
     public void increment(Long userId) {
         try {
             redisTemplate.opsForValue().increment(KEY_PREFIX + userId);
         } catch (Exception e) {
-            log.warn("Redis unavailable, skipping rate limit");
+            log.warn("Redis unavailable — skipping unread increment for userId={}", userId);
         }
     }
 
     public void decrement(Long userId) {
-        String key = KEY_PREFIX + userId;
-        Long current = getCurrentCount(userId);
-        // Never go below 0
-        if (current != null && current > 0) {
-            redisTemplate.opsForValue().decrement(key);
+        try {
+            Long current = getCurrentCount(userId);
+            if (current != null && current > 0) {
+                redisTemplate.opsForValue().decrement(KEY_PREFIX + userId);
+            }
+        } catch (Exception e) {
+            log.warn("Redis unavailable — skipping unread decrement for userId={}", userId);
         }
     }
 
     public Long getUnreadCount(Long userId) {
         Long count = getCurrentCount(userId);
-        if (count != null) return count;
-
-        // Redis miss — this shouldn't happen often
-        // Caller should fall back to DB count and re-sync
-        log.warn("Redis miss for unread count userId={}", userId);
-        return null;
+        if (count == null) {
+            log.debug("Redis miss for unread count userId={} — caller should fall back to DB", userId);
+        }
+        return count;
     }
 
     public void resetCount(Long userId) {
-        redisTemplate.opsForValue().set(KEY_PREFIX + userId, "0");
+        try {
+            redisTemplate.opsForValue().set(KEY_PREFIX + userId, "0");
+        } catch (Exception e) {
+            log.warn("Redis unavailable — skipping unread reset for userId={}", userId);
+        }
     }
 
     public void syncCount(Long userId, long dbCount) {
-        redisTemplate.opsForValue().set(KEY_PREFIX + userId,
-                String.valueOf(dbCount));
+        try {
+            redisTemplate.opsForValue().set(KEY_PREFIX + userId, String.valueOf(dbCount));
+        } catch (Exception e) {
+            log.warn("Redis unavailable — skipping unread sync for userId={}", userId);
+        }
     }
 
     private Long getCurrentCount(Long userId) {
-        String value = "";
         try {
-            value = redisTemplate.opsForValue().get(KEY_PREFIX + userId);
+            String value = redisTemplate.opsForValue().get(KEY_PREFIX + userId);
+            return value != null ? Long.parseLong(value) : null;
         } catch (Exception e) {
-            log.warn("Redis unavailable, skipping rate limit");
+            log.warn("Redis unavailable — cannot get unread count for userId={}", userId);
+            return null;
         }
-        return value != null ? Long.parseLong(value) : null;
     }
 }

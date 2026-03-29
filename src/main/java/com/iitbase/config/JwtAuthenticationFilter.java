@@ -1,6 +1,7 @@
 package com.iitbase.config;
 
 import com.iitbase.auth.TokenService;
+import com.iitbase.auth.TokenValidationResult;
 import com.iitbase.user.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -52,11 +53,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             // Step 2: Extract JTI and validate against Redis whitelist
+            // Step 2: Check Redis whitelist — fall back gracefully if Redis is down
             String jti = jwtUtil.extractJti(token);
-            if (jti == null || !tokenService.isTokenValid(jti)) {
-                log.warn("Token not in Redis whitelist - JTI: {}", jti);
-                filterChain.doFilter(request, response);
-                return;
+            if (jti != null) {
+                TokenValidationResult result = tokenService.checkToken(jti);
+                if (result == TokenValidationResult.INVALID) {
+                    log.warn("Token revoked or not in whitelist - JTI: {}", jti);
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+                if (result == TokenValidationResult.REDIS_UNAVAILABLE) {
+                    log.warn("Redis down — bypassing whitelist check, trusting JWT signature for JTI: {}", jti);
+                    // fall through — JWT signature already validated in Step 1
+                }
             }
 
             // Step 3: Authenticate user
