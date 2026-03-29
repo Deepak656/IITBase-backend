@@ -13,7 +13,7 @@ public class RedisConfig {
 
     @Bean
     public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory factory) {
-
+        log.info("Redis URL from ENV: {}", System.getenv("SPRING_REDIS_URL"));
         // 🔍 Test connection at startup
         try {
             String pong = factory.getConnection().ping();

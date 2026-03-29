@@ -10,9 +10,6 @@ spring:
       url: ${SPRING_REDIS_URL}
       connect-timeout: 2000
       timeout: 2000
-      ssl:
-        enabled: true
-
   redis:
     lettuce:
       pool:
@@ -26,6 +23,8 @@ logging:
   level:
     com.iitbase: INFO
     org.springframework.security: WARN
+    org.springframework.data.redis: DEBUG
+    io.lettuce.core: DEBUG
 
 email:
   provider: resend
