@@ -53,44 +53,13 @@ public class EmailTemplateShell {
                   <table role="presentation" width="560" cellpadding="0" cellspacing="0"
                          style="max-width:560px;width:100%%;">
 
-                    <!-- Logo row -->
+                    <!-- Logo row — wordmark only -->
                     <tr>
                       <td style="padding-bottom:24px;text-align:center;">
-                        <table role="presentation" cellpadding="0" cellspacing="0"
-                               style="margin:0 auto;">
-                          <tr>
-                            <!-- Logo mark -->
-                            <td style="background:linear-gradient(135deg,#6366f1,#818cf8);
-                                       width:38px;height:38px;border-radius:10px;
-                                       text-align:center;vertical-align:middle;">
-                              <!--[if !mso]><!-->
-                              <img src="%s/logo.png"
-                                   alt="IITBase"
-                                   width="24" height="24"
-                                   style="display:block;margin:7px auto;
-                                          width:24px;height:24px;object-fit:contain;
-                                          border:0;outline:none;">
-                              <!--<![endif]-->
-                              <!--[if mso]>
-                              <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml"
-                                           style="width:38px;height:38px;" arcsize="26%%"
-                                           fillcolor="#6366f1" strokecolor="#6366f1">
-                                <v:textbox inset="0,0,0,0" style="mso-fit-shape-to-text:true;">
-                                  <p style="font-family:Georgia,serif;font-size:20px;font-weight:700;
-                                            color:#ffffff;text-align:center;margin:0;line-height:38px;">I</p>
-                                </v:textbox>
-                              </v:roundrect>
-                              <![endif]-->
-                            </td>
-                            <!-- Logo name -->
-                            <td style="padding-left:11px;vertical-align:middle;">
-                              <span style="font-family:Georgia,serif;font-size:20px;
-                                           font-weight:500;color:#f8fafc;letter-spacing:-0.3px;">
-                                IITBase
-                              </span>
-                            </td>
-                          </tr>
-                        </table>
+                        <span style="font-family:Georgia,serif;font-size:22px;
+                                     font-weight:500;color:#f8fafc;letter-spacing:-0.4px;">
+                          IITBase
+                        </span>
                       </td>
                     </tr>
 
@@ -120,7 +89,7 @@ public class EmailTemplateShell {
               </table>
             </body>
             </html>
-            """.formatted(baseUrl, content, baseUrl, baseUrl);
+            """.formatted(content, baseUrl, baseUrl);
     }
 
     // ── Eyebrow label ─────────────────────────────────────────────────────
