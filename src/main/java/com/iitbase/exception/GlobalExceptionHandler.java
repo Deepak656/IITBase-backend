@@ -4,6 +4,7 @@ import com.iitbase.application.exception.ApplicationNotFoundException;
 import com.iitbase.application.exception.DuplicateApplicationException;
 import com.iitbase.application.exception.InvalidStatusTransitionException;
 import com.iitbase.common.ApiResponse;
+import com.iitbase.jobseeker.llm.ResumeParseException;
 import com.iitbase.recruiter.exception.CompanyNotFoundException;
 import com.iitbase.recruiter.exception.RecruiterJobNotFoundException;
 import com.iitbase.recruiter.exception.RecruiterProfileAlreadyExistsException;
@@ -13,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -118,6 +118,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleInvalidTransition(
             InvalidStatusTransitionException ex) {
         log.error("Invalid status transition: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+    @ExceptionHandler(ResumeParseException.class)
+    public ResponseEntity<ApiResponse<Void>> handleResumeParseException(ResumeParseException ex) {
+        log.error("Resume parse failed: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body(ApiResponse.error(ex.getMessage()));
     }

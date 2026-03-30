@@ -209,23 +209,4 @@ public class AuthController {
 
         return ResponseEntity.ok(ApiResponse.success(null, "Current email verified"));
     }
-
-    @GetMapping("/health/redis")
-    public ResponseEntity<String> redisHealth() {
-        try {
-            redisTemplate.opsForValue().get("ping");
-            return ResponseEntity.ok("Redis OK");
-        } catch (Exception e) {
-            log.error("Redis health check failed", e);
-            return ResponseEntity.status(503).body("Redis DOWN: " + e.getMessage());
-        }
-    }
-    @GetMapping("/health/redis-debug")
-    public ResponseEntity<Map<String, String>> redisDebug() {
-        Map<String, String> info = new LinkedHashMap<>();
-        info.put("REDISHOST", System.getenv("REDISHOST"));
-        info.put("REDISPORT", System.getenv("REDISPORT"));
-        info.put("REDISPASSWORD_SET", System.getenv("REDISPASSWORD") != null ? "YES (len=" + System.getenv("REDISPASSWORD").length() + ")" : "NOT SET");
-        return ResponseEntity.ok(info);
-    }
 }

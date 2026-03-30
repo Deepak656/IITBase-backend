@@ -1,0 +1,2401 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+controller/CertificationController.java
+controller/EducationController.java
+controller/JobPreferenceController.java
+controller/JobseekerProfileController.java
+controller/ProjectController.java
+controller/SkillController.java
+controller/WorkExperienceController.java
+dto/CertificationDTO.java
+dto/EducationDTO.java
+dto/JobPreferenceDTO.java
+dto/JobseekerBasicInfoRequest.java
+dto/JobseekerProfileDTO.java
+dto/ProjectDTO.java
+dto/SkillDTO.java
+dto/WorkExperienceDTO.java
+model/Certification.java
+model/Education.java
+model/JobPreference.java
+model/Jobseeker.java
+model/Project.java
+model/Skill.java
+model/WorkExperience.java
+repository/CertificationRepository.java
+repository/EducationRepository.java
+repository/JobPreferenceRepository.java
+repository/JobseekerRepository.java
+repository/ProjectRepository.java
+repository/SkillRepository.java
+repository/WorkExperienceRepository.java
+service/CertificationService.java
+service/EducationService.java
+service/JobPreferenceService.java
+service/JobseekerProfileService.java
+service/ProjectService.java
+service/SkillService.java
+service/WorkExperienceService.java
+storage/R2StorageService.java
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="controller/CertificationController.java">
+package com.iitbase.jobseeker.controller;
+
+import com.iitbase.common.ApiResponse;
+import com.iitbase.jobseeker.dto.CertificationDTO;
+import com.iitbase.jobseeker.service.CertificationService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/v1/profile/certifications")
+@RequiredArgsConstructor
+public class CertificationController {
+
+    private final CertificationService certificationService;
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<CertificationDTO>>> getAll(Authentication auth) {
+        return ResponseEntity.ok(ApiResponse.success(certificationService.getAll(auth.getName())));
+    }
+
+    @PostMapping
+    public ResponseEntity<ApiResponse<CertificationDTO>> add(
+            @Valid @RequestBody CertificationDTO dto, Authentication auth) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(certificationService.add(auth.getName(), dto), "Certification added"));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<CertificationDTO>> update(
+            @PathVariable Long id, @Valid @RequestBody CertificationDTO dto, Authentication auth) {
+        return ResponseEntity.ok(ApiResponse.success(certificationService.update(auth.getName(), id, dto)));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id, Authentication auth) {
+        certificationService.delete(auth.getName(), id);
+        return ResponseEntity.ok(ApiResponse.success(null, "Certification deleted"));
+    }
+}
+</file>
+
+<file path="controller/EducationController.java">
+package com.iitbase.jobseeker.controller;
+
+import com.iitbase.common.ApiResponse;
+import com.iitbase.jobseeker.dto.EducationDTO;
+import com.iitbase.jobseeker.service.EducationService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/v1/profile/education")
+@RequiredArgsConstructor
+public class EducationController {
+
+    private final EducationService educationService;
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<EducationDTO>>> getAll(Authentication auth) {
+        return ResponseEntity.ok(ApiResponse.success(educationService.getAll(auth.getName())));
+    }
+
+    @PostMapping
+    public ResponseEntity<ApiResponse<EducationDTO>> add(
+            @Valid @RequestBody EducationDTO dto, Authentication auth) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(educationService.add(auth.getName(), dto), "Education added"));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<EducationDTO>> update(
+            @PathVariable Long id, @Valid @RequestBody EducationDTO dto, Authentication auth) {
+        return ResponseEntity.ok(ApiResponse.success(educationService.update(auth.getName(), id, dto)));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id, Authentication auth) {
+        educationService.delete(auth.getName(), id);
+        return ResponseEntity.ok(ApiResponse.success(null, "Education deleted"));
+    }
+}
+</file>
+
+<file path="controller/JobPreferenceController.java">
+package com.iitbase.jobseeker.controller;
+
+import com.iitbase.common.ApiResponse;
+import com.iitbase.jobseeker.dto.JobPreferenceDTO;
+import com.iitbase.jobseeker.service.JobPreferenceService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+@Slf4j
+@RestController
+@RequestMapping("/api/v1/profile/job-preferences")
+@RequiredArgsConstructor
+public class JobPreferenceController {
+
+    private final JobPreferenceService jobPreferenceService;
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<JobPreferenceDTO>> get(Authentication auth) {
+        JobPreferenceDTO preference = jobPreferenceService.getJobPreference(auth.getName());
+        return ResponseEntity.ok(ApiResponse.success(preference));
+    }
+
+    @PostMapping
+    public ResponseEntity<ApiResponse<JobPreferenceDTO>> createOrUpdate(
+            @Valid @RequestBody JobPreferenceDTO dto, Authentication auth) {
+        JobPreferenceDTO saved = jobPreferenceService.saveOrUpdateJobPreference(auth.getName(), dto);
+        return ResponseEntity.ok(ApiResponse.success(saved, "Job preferences saved"));
+    }
+
+    @PutMapping
+    public ResponseEntity<ApiResponse<JobPreferenceDTO>> update(
+            @Valid @RequestBody JobPreferenceDTO dto, Authentication auth) {
+        JobPreferenceDTO updated = jobPreferenceService.saveOrUpdateJobPreference(auth.getName(), dto);
+        return ResponseEntity.ok(ApiResponse.success(updated, "Job preferences updated"));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<ApiResponse<Void>> delete(Authentication auth) {
+        jobPreferenceService.deleteJobPreference(auth.getName());
+        return ResponseEntity.ok(ApiResponse.success(null, "Job preferences deleted"));
+    }
+}
+</file>
+
+<file path="controller/JobseekerProfileController.java">
+package com.iitbase.jobseeker.controller;
+
+import com.iitbase.common.ApiResponse;
+import com.iitbase.jobseeker.dto.JobseekerBasicInfoRequest;
+import com.iitbase.jobseeker.dto.JobseekerProfileDTO;
+import com.iitbase.jobseeker.service.JobseekerProfileService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+@Slf4j
+@RestController
+@RequestMapping("/api/v1/profile")
+@RequiredArgsConstructor
+public class JobseekerProfileController {
+
+    private final JobseekerProfileService profileService;
+
+    /**
+     * GET /api/v1/profile
+     * Full profile — all sections in one response.
+     */
+    @GetMapping
+    public ResponseEntity<ApiResponse<JobseekerProfileDTO>> getProfile(Authentication auth) {
+        JobseekerProfileDTO profile = profileService.getFullProfile(auth.getName());
+        return ResponseEntity.ok(ApiResponse.success(profile));
+    }
+
+    /**
+     * PUT /api/v1/profile/basic
+     * Update name, headline, summary, links, career break flag.
+     */
+    @PutMapping("/basic")
+    public ResponseEntity<ApiResponse<JobseekerProfileDTO>> updateBasicInfo(
+            @Valid @RequestBody JobseekerBasicInfoRequest request,
+            Authentication auth) {
+        JobseekerProfileDTO updated = profileService.updateBasicInfo(auth.getName(), request);
+        return ResponseEntity.ok(ApiResponse.success(updated, "Profile updated"));
+    }
+
+    /**
+     * POST /api/v1/profile/resume
+     * Upload resume PDF — max 5MB. Replaces existing.
+     */
+    @PostMapping(value = "/resume", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<String>> uploadResume(
+            @RequestParam("file") MultipartFile file,
+            Authentication auth) {
+        String url = profileService.uploadResume(auth.getName(), file);
+        return ResponseEntity.ok(ApiResponse.success(url, "Resume uploaded"));
+    }
+
+    /**
+     * POST /api/v1/profile/photo
+     * Upload profile photo — max 2MB, jpeg/png/webp. Replaces existing.
+     */
+    @PostMapping(value = "/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<String>> uploadPhoto(
+            @RequestParam("file") MultipartFile file,
+            Authentication auth) {
+        String url = profileService.uploadProfilePhoto(auth.getName(), file);
+        return ResponseEntity.ok(ApiResponse.success(url, "Photo uploaded"));
+    }
+}
+</file>
+
+<file path="controller/ProjectController.java">
+package com.iitbase.jobseeker.controller;
+
+import com.iitbase.common.ApiResponse;
+import com.iitbase.jobseeker.dto.ProjectDTO;
+import com.iitbase.jobseeker.service.ProjectService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/v1/profile/projects")
+@RequiredArgsConstructor
+public class ProjectController {
+
+    private final ProjectService projectService;
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<ProjectDTO>>> getAll(Authentication auth) {
+        return ResponseEntity.ok(ApiResponse.success(projectService.getAll(auth.getName())));
+    }
+
+    @PostMapping
+    public ResponseEntity<ApiResponse<ProjectDTO>> add(
+            @Valid @RequestBody ProjectDTO dto, Authentication auth) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(projectService.add(auth.getName(), dto), "Project added"));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<ProjectDTO>> update(
+            @PathVariable Long id, @Valid @RequestBody ProjectDTO dto, Authentication auth) {
+        return ResponseEntity.ok(ApiResponse.success(projectService.update(auth.getName(), id, dto)));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id, Authentication auth) {
+        projectService.delete(auth.getName(), id);
+        return ResponseEntity.ok(ApiResponse.success(null, "Project deleted"));
+    }
+}
+</file>
+
+<file path="controller/SkillController.java">
+package com.iitbase.jobseeker.controller;
+
+import com.iitbase.common.ApiResponse;
+import com.iitbase.jobseeker.dto.SkillDTO;
+import com.iitbase.jobseeker.service.SkillService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/v1/profile/skills")
+@RequiredArgsConstructor
+public class SkillController {
+
+    private final SkillService skillService;
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<SkillDTO>>> getAll(Authentication auth) {
+        return ResponseEntity.ok(ApiResponse.success(skillService.getAll(auth.getName())));
+    }
+
+    @PostMapping
+    public ResponseEntity<ApiResponse<SkillDTO>> add(
+            @Valid @RequestBody SkillDTO dto, Authentication auth) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(skillService.add(auth.getName(), dto), "Skill added"));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<SkillDTO>> update(
+            @PathVariable Long id, @Valid @RequestBody SkillDTO dto, Authentication auth) {
+        return ResponseEntity.ok(ApiResponse.success(skillService.update(auth.getName(), id, dto)));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id, Authentication auth) {
+        skillService.delete(auth.getName(), id);
+        return ResponseEntity.ok(ApiResponse.success(null, "Skill deleted"));
+    }
+}
+</file>
+
+<file path="controller/WorkExperienceController.java">
+package com.iitbase.jobseeker.controller;
+
+import com.iitbase.common.ApiResponse;
+import com.iitbase.jobseeker.dto.WorkExperienceDTO;
+import com.iitbase.jobseeker.service.WorkExperienceService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/v1/profile/experience")
+@RequiredArgsConstructor
+public class WorkExperienceController {
+
+    private final WorkExperienceService workExperienceService;
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<WorkExperienceDTO>>> getAll(Authentication auth) {
+        return ResponseEntity.ok(ApiResponse.success(workExperienceService.getAll(auth.getName())));
+    }
+
+    @PostMapping
+    public ResponseEntity<ApiResponse<WorkExperienceDTO>> add(
+            @Valid @RequestBody WorkExperienceDTO dto, Authentication auth) {
+        WorkExperienceDTO saved = workExperienceService.add(auth.getName(), dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(saved, "Experience added"));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<WorkExperienceDTO>> update(
+            @PathVariable Long id,
+            @Valid @RequestBody WorkExperienceDTO dto,
+            Authentication auth) {
+        return ResponseEntity.ok(ApiResponse.success(workExperienceService.update(auth.getName(), id, dto)));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id, Authentication auth) {
+        workExperienceService.delete(auth.getName(), id);
+        return ResponseEntity.ok(ApiResponse.success(null, "Experience deleted"));
+    }
+}
+</file>
+
+<file path="dto/CertificationDTO.java">
+package com.iitbase.jobseeker.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class CertificationDTO {
+
+    private Long id;
+
+    @NotBlank(message = "Certification name is required")
+    private String name;
+
+    @NotBlank(message = "Issuer is required")
+    private String issuer;
+
+    private Integer issueMonth;
+
+    private Integer issueYear;
+
+    private Integer expiryMonth;
+
+    private Integer expiryYear;
+
+    private Boolean doesNotExpire;
+
+    private String credentialId;
+
+    private String credentialUrl;
+
+    private Integer displayOrder;
+}
+</file>
+
+<file path="dto/EducationDTO.java">
+package com.iitbase.jobseeker.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class EducationDTO {
+
+    private Long id;
+
+    @NotBlank(message = "Institution is required")
+    private String institution;
+
+    @NotBlank(message = "Degree is required")
+    private String degree;
+
+    private String fieldOfStudy;
+
+    private Integer startYear;
+
+    private Integer endYear;
+
+    private String grade;
+
+    private String gradeType;  // CGPA, PERCENTAGE, GPA
+
+    private String description;
+
+    private Integer displayOrder;
+}
+</file>
+
+<file path="dto/JobPreferenceDTO.java">
+package com.iitbase.jobseeker.dto;
+
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class JobPreferenceDTO {
+
+    private Long id;
+
+    @Size(max = 255)
+    private String currentLocation;
+
+    @Size(max = 50)
+    private String workLocationType;  // REMOTE, HYBRID, ONSITE
+
+    private List<String> preferredCities;
+
+    @DecimalMin(value = "0.0", inclusive = true)
+    private BigDecimal previousSalary;
+
+    @Size(max = 10)
+    private String previousSalaryCurrency;
+
+    @DecimalMin(value = "0.0", inclusive = true)
+    private BigDecimal expectedSalary;
+
+    @Size(max = 10)
+    private String expectedSalaryCurrency;
+
+    @Size(max = 50)
+    private String noticePeriod;  // IMMEDIATE, 15_DAYS, 30_DAYS, 60_DAYS, 90_DAYS
+
+    @Size(max = 100)
+    private String primaryRole;  // BACKEND, FRONTEND, FULLSTACK, DATA, DEVOPS
+
+    private List<String> openToRoles;  // secondary roles
+}
+</file>
+
+<file path="dto/JobseekerBasicInfoRequest.java">
+package com.iitbase.jobseeker.dto;
+
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import lombok.*;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class JobseekerBasicInfoRequest {
+
+    @Size(max = 100, message = "Name too long")
+    private String fullName;
+
+    @Pattern(regexp = "^[+]?[0-9]{10,15}$", message = "Invalid phone number")
+    private String phone;
+
+    @Size(max = 200, message = "Headline too long")
+    private String headline;
+
+    @Size(max = 2000, message = "Summary too long")
+    private String summary;
+
+    @Size(max = 500, message = "URL too long")
+    private String linkedinUrl;
+
+    @Size(max = 500, message = "URL too long")
+    private String githubUrl;
+
+    @Size(max = 500, message = "URL too long")
+    private String portfolioUrl;
+
+    private Double yearsOfExperience;
+
+    private Boolean isOnCareerBreak;
+}
+</file>
+
+<file path="dto/JobseekerProfileDTO.java">
+package com.iitbase.jobseeker.dto;
+
+import lombok.*;
+
+import java.util.List;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class JobseekerProfileDTO {
+
+    private Long id;
+    private String email;
+    private String fullName;
+    private String phone;
+    private String headline;
+    private String summary;
+    private String profilePhotoUrl;
+    private String resumeUrl;
+    private String resumeFileName;
+    private String linkedinUrl;
+    private String githubUrl;
+    private String portfolioUrl;
+    private Double yearsOfExperience;
+    private Boolean isOnCareerBreak;
+    private Integer profileCompletion;
+
+    // Nested sections
+    private List<WorkExperienceDTO> workExperiences;
+    private List<EducationDTO> educations;
+    private List<SkillDTO> skills;
+    private List<ProjectDTO> projects;
+    private List<CertificationDTO> certifications;
+    private JobPreferenceDTO jobPreference;
+}
+</file>
+
+<file path="dto/ProjectDTO.java">
+package com.iitbase.jobseeker.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class ProjectDTO {
+
+    private Long id;
+
+    @NotBlank(message = "Project title is required")
+    private String title;
+
+    private String description;
+
+    private String techStack;
+
+    private String projectUrl;
+
+    private String repoUrl;
+
+    private Integer startMonth;
+
+    private Integer startYear;
+
+    private Integer endMonth;
+
+    private Integer endYear;
+
+    private Boolean isOngoing;
+
+    private Integer displayOrder;
+}
+</file>
+
+<file path="dto/SkillDTO.java">
+package com.iitbase.jobseeker.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class SkillDTO {
+
+    private Long id;
+
+    @NotBlank(message = "Skill name is required")
+    private String name;
+
+    private String proficiencyLevel;  // BEGINNER, INTERMEDIATE, ADVANCED, EXPERT
+
+    private Integer yearsOfExperience;
+
+    private Integer displayOrder;
+}
+</file>
+
+<file path="dto/WorkExperienceDTO.java">
+package com.iitbase.jobseeker.dto;
+
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class WorkExperienceDTO {
+
+    private Long id;
+
+    @NotBlank(message = "Company name is required")
+    private String company;
+
+    @NotBlank(message = "Job title is required")
+    private String title;
+
+    private String location;
+
+    private String employmentType;  // FULL_TIME, PART_TIME, CONTRACT, INTERNSHIP, FREELANCE
+
+    @Min(1) @Max(12)
+    private Integer startMonth;
+
+    @NotNull(message = "Start year is required")
+    private Integer startYear;
+
+    @Min(1) @Max(12)
+    private Integer endMonth;
+
+    private Integer endYear;
+
+    private Boolean isCurrent;
+
+    private String description;
+
+    private String skillsUsed;
+
+    private Integer displayOrder;
+}
+</file>
+
+<file path="model/Certification.java">
+package com.iitbase.jobseeker.model;
+
+import com.iitbase.common.BaseEntity;
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "certifications", indexes = {
+        @Index(name = "idx_cert_jobseeker", columnList = "jobseeker_id")
+})
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Certification extends BaseEntity {
+
+    @Column(name = "jobseeker_id", nullable = false)
+    private Long jobseekerId;
+
+    @Column(nullable = false)
+    private String name;  // AWS Certified Solutions Architect
+
+    @Column(nullable = false)
+    private String issuer;  // Amazon Web Services
+
+    @Column(name = "issue_month")
+    private Integer issueMonth;
+
+    @Column(name = "issue_year")
+    private Integer issueYear;
+
+    @Column(name = "expiry_month")
+    private Integer expiryMonth;
+
+    @Column(name = "expiry_year")
+    private Integer expiryYear;
+
+    @Column(name = "does_not_expire")
+    @Builder.Default
+    private Boolean doesNotExpire = false;
+
+    @Column(name = "credential_id")
+    private String credentialId;
+
+    @Column(name = "credential_url")
+    private String credentialUrl;
+
+    @Column(name = "display_order")
+    private Integer displayOrder;
+}
+</file>
+
+<file path="model/Education.java">
+package com.iitbase.jobseeker.model;
+
+import com.iitbase.common.BaseEntity;
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "educations", indexes = {
+        @Index(name = "idx_education_jobseeker", columnList = "jobseeker_id")
+})
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Education extends BaseEntity {
+
+    @Column(name = "jobseeker_id", nullable = false)
+    private Long jobseekerId;
+
+    @Column(nullable = false)
+    private String institution;  // IIT Bombay, IIT Delhi etc.
+
+    @Column(nullable = false)
+    private String degree;  // B.Tech, M.Tech, MBA, PhD
+
+    private String fieldOfStudy;  // Mechanical Engineering, CS, etc.
+
+    @Column(name = "start_year")
+    private Integer startYear;
+
+    @Column(name = "end_year")
+    private Integer endYear;
+
+    @Column(name = "grade")
+    private String grade;  // CPI, CGPA, percentage — keep as string for flexibility
+
+    @Column(name = "grade_type", length = 20)
+    private String gradeType;  // CGPA, PERCENTAGE, GPA
+
+    @Column(columnDefinition = "TEXT")
+    private String description;  // activities, societies, achievements
+
+    @Column(name = "display_order")
+    private Integer displayOrder;
+}
+</file>
+
+<file path="model/JobPreference.java">
+package com.iitbase.jobseeker.model;
+
+import com.iitbase.common.BaseEntity;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.math.BigDecimal;
+
+@Entity
+@Table(name = "jobseeker_job_preferences")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class JobPreference extends BaseEntity {
+
+    @Column(name = "jobseeker_id", nullable = false, unique = true)
+    private Long jobseekerId;
+
+    @Column(name = "current_location")
+    private String currentLocation;
+
+    @Column(name = "work_location_type", length = 50)
+    private String workLocationType;  // REMOTE, HYBRID, ONSITE
+
+    @Column(name = "preferred_cities", columnDefinition = "text[]")
+    private String[] preferredCities;
+
+    @Column(name = "previous_salary", precision = 12, scale = 2)
+    private BigDecimal previousSalary;
+
+    @Column(name = "previous_salary_currency", length = 10)
+    @Builder.Default
+    private String previousSalaryCurrency = "INR";
+
+    @Column(name = "expected_salary", precision = 12, scale = 2)
+    private BigDecimal expectedSalary;
+
+    @Column(name = "expected_salary_currency", length = 10)
+    @Builder.Default
+    private String expectedSalaryCurrency = "INR";
+
+    @Column(name = "notice_period", length = 50)
+    private String noticePeriod;  // IMMEDIATE, 15_DAYS, 30_DAYS, 60_DAYS, 90_DAYS
+
+    @Column(name = "primary_role", length = 100)
+    private String primaryRole;  // BACKEND, FRONTEND, FULLSTACK, DATA, DEVOPS etc.
+
+    @Column(name = "open_to_roles", columnDefinition = "text[]")
+    private String[] openToRoles;  // secondary roles they'd consider
+}
+</file>
+
+<file path="model/Jobseeker.java">
+package com.iitbase.jobseeker.model;
+
+import com.iitbase.common.BaseEntity;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "jobseekers", indexes = {
+        @Index(name = "idx_jobseeker_user_id", columnList = "user_id")
+})
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Jobseeker extends BaseEntity {
+
+    @Column(name = "user_id", unique = true, nullable = false)
+    private Long userId;  // FK to users.id
+
+    @Column(nullable = false)
+    private String email;
+
+    @Column(name = "full_name")
+    private String fullName;
+
+    private String phone;
+
+    private String headline;  // e.g. "Backend Engineer | IIT Bombay | 2+ years"
+
+    @Column(columnDefinition = "TEXT")
+    private String summary;  // short about me
+
+    @Column(name = "profile_photo_url")
+    private String profilePhotoUrl;
+
+    @Column(name = "resume_url")
+    private String resumeUrl;
+
+    @Column(name = "resume_file_name")
+    private String resumeFileName;  // original filename shown in UI
+
+    @Column(name = "linkedin_url")
+    private String linkedinUrl;
+
+    @Column(name = "github_url")
+    private String githubUrl;
+
+    @Column(name = "portfolio_url")
+    private String portfolioUrl;
+
+    @Column(name = "years_of_experience")
+    private Double yearsOfExperience;
+
+    @Column(name = "is_on_career_break")
+    @Builder.Default
+    private Boolean isOnCareerBreak = false;
+
+    @Column(name = "profile_completion")
+    @Builder.Default
+    private Integer profileCompletion = 0;  // 0-100, computed on save
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean isVerified = false;
+
+    private LocalDateTime verifiedAt;
+}
+</file>
+
+<file path="model/Project.java">
+package com.iitbase.jobseeker.model;
+
+import com.iitbase.common.BaseEntity;
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "projects", indexes = {
+        @Index(name = "idx_project_jobseeker", columnList = "jobseeker_id")
+})
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Project extends BaseEntity {
+
+    @Column(name = "jobseeker_id", nullable = false)
+    private Long jobseekerId;
+
+    @Column(nullable = false)
+    private String title;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @Column(name = "tech_stack")
+    private String techStack;  // "Java, Spring Boot, PostgreSQL, Redis"
+
+    @Column(name = "project_url")
+    private String projectUrl;  // live URL
+
+    @Column(name = "repo_url")
+    private String repoUrl;  // GitHub link
+
+    @Column(name = "start_month")
+    private Integer startMonth;
+
+    @Column(name = "start_year")
+    private Integer startYear;
+
+    @Column(name = "end_month")
+    private Integer endMonth;
+
+    @Column(name = "end_year")
+    private Integer endYear;
+
+    @Column(name = "is_ongoing")
+    @Builder.Default
+    private Boolean isOngoing = false;
+
+    @Column(name = "display_order")
+    private Integer displayOrder;
+}
+</file>
+
+<file path="model/Skill.java">
+package com.iitbase.jobseeker.model;
+
+import com.iitbase.common.BaseEntity;
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "skills", indexes = {
+        @Index(name = "idx_skill_jobseeker", columnList = "jobseeker_id")
+})
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Skill extends BaseEntity {
+
+    @Column(name = "jobseeker_id", nullable = false)
+    private Long jobseekerId;
+
+    @Column(nullable = false)
+    private String name;  // Java, Spring Boot, PostgreSQL
+
+    @Column(name = "proficiency_level", length = 20)
+    private String proficiencyLevel;  // BEGINNER, INTERMEDIATE, ADVANCED, EXPERT
+
+    @Column(name = "years_of_experience")
+    private Integer yearsOfExperience;
+
+    @Column(name = "display_order")
+    private Integer displayOrder;
+}
+</file>
+
+<file path="model/WorkExperience.java">
+package com.iitbase.jobseeker.model;
+
+import com.iitbase.common.BaseEntity;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.YearMonth;
+
+@Entity
+@Table(name = "work_experiences", indexes = {
+        @Index(name = "idx_work_exp_jobseeker", columnList = "jobseeker_id")
+})
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class WorkExperience extends BaseEntity {
+
+    @Column(name = "jobseeker_id", nullable = false)
+    private Long jobseekerId;
+
+    @Column(nullable = false)
+    private String company;
+
+    @Column(nullable = false)
+    private String title;  // job title / designation
+
+    private String location;
+
+    @Column(name = "employment_type", length = 50)
+    private String employmentType;  // FULL_TIME, PART_TIME, CONTRACT, INTERNSHIP, FREELANCE
+
+    @Column(name = "start_month")
+    private Integer startMonth;
+
+    @Column(name = "start_year", nullable = false)
+    private Integer startYear;
+
+    @Column(name = "end_month")
+    private Integer endMonth;
+
+    @Column(name = "end_year")
+    private Integer endYear;
+
+    @Column(name = "is_current")
+    @Builder.Default
+    private Boolean isCurrent = false;  // if true, end date is null
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @Column(name = "skills_used")
+    private String skillsUsed;  // comma-separated, e.g. "Java, Spring Boot, PostgreSQL"
+
+    @Column(name = "display_order")
+    private Integer displayOrder;  // for manual reordering
+}
+</file>
+
+<file path="repository/CertificationRepository.java">
+package com.iitbase.jobseeker.repository;
+
+import com.iitbase.jobseeker.model.Certification;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.List;
+
+@Repository
+public interface CertificationRepository extends JpaRepository<Certification, Long> {
+    List<Certification> findByJobseekerIdOrderByDisplayOrderAscIssueYearDesc(Long jobseekerId);
+    void deleteByJobseekerId(Long jobseekerId);
+    boolean existsByIdAndJobseekerId(Long id, Long jobseekerId);
+}
+</file>
+
+<file path="repository/EducationRepository.java">
+package com.iitbase.jobseeker.repository;
+
+import com.iitbase.jobseeker.model.Education;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.List;
+
+@Repository
+public interface EducationRepository extends JpaRepository<Education, Long> {
+    List<Education> findByJobseekerIdOrderByDisplayOrderAscEndYearDesc(Long jobseekerId);
+    void deleteByJobseekerId(Long jobseekerId);
+    boolean existsByIdAndJobseekerId(Long id, Long jobseekerId);
+}
+</file>
+
+<file path="repository/JobPreferenceRepository.java">
+package com.iitbase.jobseeker.repository;
+
+import com.iitbase.jobseeker.model.JobPreference;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.Optional;
+
+@Repository
+public interface JobPreferenceRepository extends JpaRepository<JobPreference, Long> {
+    Optional<JobPreference> findByJobseekerId(Long jobseekerId);
+    void deleteByJobseekerId(Long jobseekerId);
+}
+</file>
+
+<file path="repository/JobseekerRepository.java">
+package com.iitbase.jobseeker.repository;
+
+import com.iitbase.jobseeker.model.Jobseeker;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface JobseekerRepository extends JpaRepository<Jobseeker, Long> {
+    Optional<Jobseeker> findByUserId(Long userId);   // Long, not String
+    Optional<Jobseeker> findByEmail(String email);
+    boolean existsByUserId(Long userId);
+    Page<Jobseeker> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
+    Page<Jobseeker> findByIsVerified(Boolean isVerified, Pageable pageable);
+
+    Page<Jobseeker> findByFullNameContainingIgnoreCase(String name, Pageable pageable);
+}
+</file>
+
+<file path="repository/ProjectRepository.java">
+package com.iitbase.jobseeker.repository;
+
+import com.iitbase.jobseeker.model.Project;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.List;
+
+@Repository
+public interface ProjectRepository extends JpaRepository<Project, Long> {
+    List<Project> findByJobseekerIdOrderByDisplayOrderAscStartYearDesc(Long jobseekerId);
+    void deleteByJobseekerId(Long jobseekerId);
+    boolean existsByIdAndJobseekerId(Long id, Long jobseekerId);
+}
+</file>
+
+<file path="repository/SkillRepository.java">
+package com.iitbase.jobseeker.repository;
+
+import com.iitbase.jobseeker.model.Skill;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.List;
+
+@Repository
+public interface SkillRepository extends JpaRepository<Skill, Long> {
+    List<Skill> findByJobseekerIdOrderByDisplayOrderAsc(Long jobseekerId);
+    void deleteByJobseekerId(Long jobseekerId);
+    boolean existsByIdAndJobseekerId(Long id, Long jobseekerId);
+}
+</file>
+
+<file path="repository/WorkExperienceRepository.java">
+package com.iitbase.jobseeker.repository;
+
+import com.iitbase.jobseeker.model.WorkExperience;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface WorkExperienceRepository extends JpaRepository<WorkExperience, Long> {
+    List<WorkExperience> findByJobseekerIdOrderByDisplayOrderAscStartYearDesc(Long jobseekerId);
+    void deleteByJobseekerId(Long jobseekerId);
+    boolean existsByIdAndJobseekerId(Long id, Long jobseekerId);
+}
+</file>
+
+<file path="service/CertificationService.java">
+package com.iitbase.jobseeker.service;
+
+import com.iitbase.exception.ResourceNotFoundException;
+import com.iitbase.jobseeker.dto.CertificationDTO;
+import com.iitbase.jobseeker.model.Certification;
+import com.iitbase.jobseeker.model.Jobseeker;
+import com.iitbase.jobseeker.repository.CertificationRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class CertificationService {
+
+    private final CertificationRepository certificationRepository;
+    private final JobseekerProfileService profileService;
+
+    @Transactional(readOnly = true)
+    public List<CertificationDTO> getAll(String email) {
+        Jobseeker jobseeker = profileService.resolveJobseeker(email);
+        return certificationRepository
+                .findByJobseekerIdOrderByDisplayOrderAscIssueYearDesc(jobseeker.getId())
+                .stream().map(this::toDTO).toList();
+    }
+
+    @Transactional
+    public CertificationDTO add(String email, CertificationDTO dto) {
+        Jobseeker jobseeker = profileService.resolveJobseeker(email);
+
+        Certification entity = Certification.builder()
+                .jobseekerId(jobseeker.getId())
+                .name(dto.getName())
+                .issuer(dto.getIssuer())
+                .issueMonth(dto.getIssueMonth())
+                .issueYear(dto.getIssueYear())
+                .expiryMonth(dto.getExpiryMonth())
+                .expiryYear(dto.getExpiryYear())
+                .doesNotExpire(Boolean.TRUE.equals(dto.getDoesNotExpire()))
+                .credentialId(dto.getCredentialId())
+                .credentialUrl(dto.getCredentialUrl())
+                .displayOrder(dto.getDisplayOrder())
+                .build();
+
+        return toDTO(certificationRepository.save(entity));
+    }
+
+    @Transactional
+    public CertificationDTO update(String email, Long id, CertificationDTO dto) {
+        Jobseeker jobseeker = profileService.resolveJobseeker(email);
+        if (!certificationRepository.existsByIdAndJobseekerId(id, jobseeker.getId())) {
+            throw new ResourceNotFoundException("Certification not found");
+        }
+
+        Certification entity = certificationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Certification not found"));
+
+        entity.setName(dto.getName());
+        entity.setIssuer(dto.getIssuer());
+        entity.setIssueMonth(dto.getIssueMonth());
+        entity.setIssueYear(dto.getIssueYear());
+        entity.setExpiryMonth(dto.getExpiryMonth());
+        entity.setExpiryYear(dto.getExpiryYear());
+        entity.setDoesNotExpire(Boolean.TRUE.equals(dto.getDoesNotExpire()));
+        entity.setCredentialId(dto.getCredentialId());
+        entity.setCredentialUrl(dto.getCredentialUrl());
+        entity.setDisplayOrder(dto.getDisplayOrder());
+
+        return toDTO(certificationRepository.save(entity));
+    }
+
+    @Transactional
+    public void delete(String email, Long id) {
+        Jobseeker jobseeker = profileService.resolveJobseeker(email);
+        if (!certificationRepository.existsByIdAndJobseekerId(id, jobseeker.getId())) {
+            throw new ResourceNotFoundException("Certification not found");
+        }
+        certificationRepository.deleteById(id);
+    }
+
+    private CertificationDTO toDTO(Certification c) {
+        return CertificationDTO.builder()
+                .id(c.getId()).name(c.getName()).issuer(c.getIssuer())
+                .issueMonth(c.getIssueMonth()).issueYear(c.getIssueYear())
+                .expiryMonth(c.getExpiryMonth()).expiryYear(c.getExpiryYear())
+                .doesNotExpire(c.getDoesNotExpire()).credentialId(c.getCredentialId())
+                .credentialUrl(c.getCredentialUrl()).displayOrder(c.getDisplayOrder())
+                .build();
+    }
+}
+</file>
+
+<file path="service/EducationService.java">
+package com.iitbase.jobseeker.service;
+
+import com.iitbase.exception.ResourceNotFoundException;
+import com.iitbase.jobseeker.dto.EducationDTO;
+import com.iitbase.jobseeker.model.Education;
+import com.iitbase.jobseeker.model.Jobseeker;
+import com.iitbase.jobseeker.repository.EducationRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class EducationService {
+
+    private final EducationRepository educationRepository;
+    private final JobseekerProfileService profileService;
+
+    @Transactional(readOnly = true)
+    public List<EducationDTO> getAll(String email) {
+        Jobseeker jobseeker = profileService.resolveJobseeker(email);
+        return educationRepository
+                .findByJobseekerIdOrderByDisplayOrderAscEndYearDesc(jobseeker.getId())
+                .stream().map(this::toDTO).toList();
+    }
+
+    @Transactional
+    public EducationDTO add(String email, EducationDTO dto) {
+        Jobseeker jobseeker = profileService.resolveJobseeker(email);
+
+        Education entity = Education.builder()
+                .jobseekerId(jobseeker.getId())
+                .institution(dto.getInstitution())
+                .degree(dto.getDegree())
+                .fieldOfStudy(dto.getFieldOfStudy())
+                .startYear(dto.getStartYear())
+                .endYear(dto.getEndYear())
+                .grade(dto.getGrade())
+                .gradeType(dto.getGradeType())
+                .description(dto.getDescription())
+                .displayOrder(dto.getDisplayOrder())
+                .build();
+
+        Education saved = educationRepository.save(entity);
+        profileService.recalculateCompletion(jobseeker);
+        return toDTO(saved);
+    }
+
+    @Transactional
+    public EducationDTO update(String email, Long id, EducationDTO dto) {
+        Jobseeker jobseeker = profileService.resolveJobseeker(email);
+        if (!educationRepository.existsByIdAndJobseekerId(id, jobseeker.getId())) {
+            throw new ResourceNotFoundException("Education record not found");
+        }
+
+        Education entity = educationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Education record not found"));
+
+        entity.setInstitution(dto.getInstitution());
+        entity.setDegree(dto.getDegree());
+        entity.setFieldOfStudy(dto.getFieldOfStudy());
+        entity.setStartYear(dto.getStartYear());
+        entity.setEndYear(dto.getEndYear());
+        entity.setGrade(dto.getGrade());
+        entity.setGradeType(dto.getGradeType());
+        entity.setDescription(dto.getDescription());
+        entity.setDisplayOrder(dto.getDisplayOrder());
+
+        return toDTO(educationRepository.save(entity));
+    }
+
+    @Transactional
+    public void delete(String email, Long id) {
+        Jobseeker jobseeker = profileService.resolveJobseeker(email);
+        if (!educationRepository.existsByIdAndJobseekerId(id, jobseeker.getId())) {
+            throw new ResourceNotFoundException("Education record not found");
+        }
+        educationRepository.deleteById(id);
+        profileService.recalculateCompletion(jobseeker);
+    }
+
+    private EducationDTO toDTO(Education e) {
+        return EducationDTO.builder()
+                .id(e.getId()).institution(e.getInstitution()).degree(e.getDegree())
+                .fieldOfStudy(e.getFieldOfStudy()).startYear(e.getStartYear())
+                .endYear(e.getEndYear()).grade(e.getGrade()).gradeType(e.getGradeType())
+                .description(e.getDescription()).displayOrder(e.getDisplayOrder())
+                .build();
+    }
+}
+</file>
+
+<file path="service/JobPreferenceService.java">
+package com.iitbase.jobseeker.service;
+
+import com.iitbase.exception.ResourceNotFoundException;
+import com.iitbase.jobseeker.dto.JobPreferenceDTO;
+import com.iitbase.jobseeker.model.JobPreference;
+import com.iitbase.jobseeker.model.Jobseeker;
+import com.iitbase.jobseeker.repository.JobPreferenceRepository;
+import com.iitbase.jobseeker.repository.JobseekerRepository;
+import com.iitbase.user.User;
+import com.iitbase.user.UserService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Arrays;
+import java.util.List;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class JobPreferenceService {
+
+    private final JobPreferenceRepository jobPreferenceRepository;
+    private final JobseekerRepository jobseekerRepository;
+    private final UserService userService;
+
+    // ─────────────────────────────────────────────
+    // Called by JobPreferenceController (dedicated endpoint)
+    // ─────────────────────────────────────────────
+
+    @Cacheable(value = "jobPreferences", key = "#email")
+    @Transactional(readOnly = true)
+    public JobPreferenceDTO getJobPreference(String email) {
+        Jobseeker jobseeker = resolveJobseeker(email);
+        return jobPreferenceRepository
+                .findByJobseekerId(jobseeker.getId())
+                .map(this::mapToDTO)
+                .orElse(null);
+    }
+
+    @CacheEvict(value = "jobPreferences", key = "#email")
+    @Transactional
+    public JobPreferenceDTO saveOrUpdateJobPreference(String email, JobPreferenceDTO dto) {
+        Jobseeker jobseeker = resolveJobseeker(email);
+
+        JobPreference preference = jobPreferenceRepository
+                .findByJobseekerId(jobseeker.getId())
+                .orElse(JobPreference.builder()
+                        .jobseekerId(jobseeker.getId())
+                        .build());
+
+        updateEntityFromDTO(preference, dto);
+
+        JobPreference saved = jobPreferenceRepository.save(preference);
+        log.info("Job preferences saved for jobseeker: {}", jobseeker.getId());
+        return mapToDTO(saved);
+    }
+
+    @CacheEvict(value = "jobPreferences", key = "#email")
+    @Transactional
+    public void deleteJobPreference(String email) {
+        Jobseeker jobseeker = resolveJobseeker(email);
+        jobPreferenceRepository.deleteByJobseekerId(jobseeker.getId());
+        log.info("Job preferences deleted for jobseeker: {}", jobseeker.getId());
+    }
+
+    // ─────────────────────────────────────────────
+    // Called internally by JobseekerProfileService.getFullProfile()
+    // Bypasses cache key mismatch — works directly on jobseekerId
+    // ─────────────────────────────────────────────
+
+    @Transactional(readOnly = true)
+    public JobPreferenceDTO getByJobseekerId(Long jobseekerId) {
+        return jobPreferenceRepository
+                .findByJobseekerId(jobseekerId)
+                .map(this::mapToDTO)
+                .orElse(null);
+    }
+
+    // ─────────────────────────────────────────────
+    // Helpers
+    // ─────────────────────────────────────────────
+
+    private Jobseeker resolveJobseeker(String email) {
+        User user = userService.findByEmail(email);
+        return jobseekerRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Jobseeker profile not found"));
+    }
+
+    public JobPreferenceDTO mapToDTO(JobPreference entity) {
+        return JobPreferenceDTO.builder()
+                .id(entity.getId())
+                .currentLocation(entity.getCurrentLocation())
+                .workLocationType(entity.getWorkLocationType())
+                .preferredCities(entity.getPreferredCities() != null
+                        ? Arrays.asList(entity.getPreferredCities()) : null)
+                .previousSalary(entity.getPreviousSalary())
+                .previousSalaryCurrency(entity.getPreviousSalaryCurrency())
+                .expectedSalary(entity.getExpectedSalary())
+                .expectedSalaryCurrency(entity.getExpectedSalaryCurrency())
+                .noticePeriod(entity.getNoticePeriod())
+                .primaryRole(entity.getPrimaryRole())
+                .openToRoles(entity.getOpenToRoles() != null
+                        ? Arrays.asList(entity.getOpenToRoles()) : null)
+                .build();
+    }
+
+    private void updateEntityFromDTO(JobPreference entity, JobPreferenceDTO dto) {
+        entity.setCurrentLocation(dto.getCurrentLocation());
+        entity.setWorkLocationType(dto.getWorkLocationType());
+        entity.setPreferredCities(dto.getPreferredCities() != null && !dto.getPreferredCities().isEmpty()
+                ? dto.getPreferredCities().toArray(new String[0]) : null);
+        entity.setPreviousSalary(dto.getPreviousSalary());
+        entity.setPreviousSalaryCurrency(dto.getPreviousSalaryCurrency());
+        entity.setExpectedSalary(dto.getExpectedSalary());
+        entity.setExpectedSalaryCurrency(dto.getExpectedSalaryCurrency());
+        entity.setNoticePeriod(dto.getNoticePeriod());
+        entity.setPrimaryRole(dto.getPrimaryRole());
+        entity.setOpenToRoles(dto.getOpenToRoles() != null && !dto.getOpenToRoles().isEmpty()
+                ? dto.getOpenToRoles().toArray(new String[0]) : null);
+    }
+}
+</file>
+
+<file path="service/JobseekerProfileService.java">
+package com.iitbase.jobseeker.service;
+
+import com.iitbase.exception.ResourceNotFoundException;
+import com.iitbase.jobseeker.dto.*;
+import com.iitbase.jobseeker.model.*;
+import com.iitbase.jobseeker.repository.*;
+import com.iitbase.jobseeker.storage.R2StorageService;
+import com.iitbase.user.User;
+import com.iitbase.user.UserRepository;
+import com.iitbase.user.UserService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class JobseekerProfileService {
+
+    private final JobseekerRepository jobseekerRepository;
+    private final WorkExperienceRepository workExperienceRepository;
+    private final EducationRepository educationRepository;
+    private final SkillRepository skillRepository;
+    private final ProjectRepository projectRepository;
+    private final CertificationRepository certificationRepository;
+    private final JobPreferenceService jobPreferenceService;  // delegate, don't duplicate
+    private final R2StorageService r2StorageService;
+    private final UserService userService;
+    private final UserRepository userRepository;
+    // ─────────────────────────────────────────────
+    // Bootstrap — call this after signup/login
+    // ─────────────────────────────────────────────
+
+    @Transactional
+    public Jobseeker getOrCreateProfile(String email) {
+        User user = userService.findByEmail(email);
+        return jobseekerRepository.findByUserId(user.getId())
+                .orElseGet(() -> {
+                    Jobseeker profile = Jobseeker.builder()
+                            .userId(user.getId())
+                            .email(user.getEmail())
+                            .profileCompletion(0)
+                            .isOnCareerBreak(false)
+                            .build();
+                    log.info("Created jobseeker profile for: {}", email);
+                    return jobseekerRepository.save(profile);
+                });
+    }
+
+    // ─────────────────────────────────────────────
+    // Full profile — single response for the frontend
+    // ─────────────────────────────────────────────
+
+    @Transactional(readOnly = true)
+    public JobseekerProfileDTO getFullProfile(String email) {
+        Jobseeker jobseeker = resolveJobseeker(email);
+
+        return JobseekerProfileDTO.builder()
+                .id(jobseeker.getId())
+                .email(jobseeker.getEmail())
+                .fullName(jobseeker.getFullName())
+                .phone(jobseeker.getPhone())
+                .headline(jobseeker.getHeadline())
+                .summary(jobseeker.getSummary())
+                .profilePhotoUrl(jobseeker.getProfilePhotoUrl())
+                .resumeUrl(jobseeker.getResumeUrl())
+                .resumeFileName(jobseeker.getResumeFileName())
+                .linkedinUrl(jobseeker.getLinkedinUrl())
+                .githubUrl(jobseeker.getGithubUrl())
+                .portfolioUrl(jobseeker.getPortfolioUrl())
+                .yearsOfExperience(jobseeker.getYearsOfExperience())
+                .isOnCareerBreak(jobseeker.getIsOnCareerBreak())
+                .profileCompletion(jobseeker.getProfileCompletion())
+                .workExperiences(
+                        workExperienceRepository
+                                .findByJobseekerIdOrderByDisplayOrderAscStartYearDesc(jobseeker.getId())
+                                .stream().map(this::toWorkExpDTO).toList()
+                )
+                .educations(
+                        educationRepository
+                                .findByJobseekerIdOrderByDisplayOrderAscEndYearDesc(jobseeker.getId())
+                                .stream().map(this::toEducationDTO).toList()
+                )
+                .skills(
+                        skillRepository
+                                .findByJobseekerIdOrderByDisplayOrderAsc(jobseeker.getId())
+                                .stream().map(this::toSkillDTO).toList()
+                )
+                .projects(
+                        projectRepository
+                                .findByJobseekerIdOrderByDisplayOrderAscStartYearDesc(jobseeker.getId())
+                                .stream().map(this::toProjectDTO).toList()
+                )
+                .certifications(
+                        certificationRepository
+                                .findByJobseekerIdOrderByDisplayOrderAscIssueYearDesc(jobseeker.getId())
+                                .stream().map(this::toCertDTO).toList()
+                )
+                // Delegates to JobPreferenceService — single source of truth
+                .jobPreference(jobPreferenceService.getByJobseekerId(jobseeker.getId()))
+                .build();
+    }
+
+    // ─────────────────────────────────────────────
+    // Basic info
+    // ─────────────────────────────────────────────
+
+    @Transactional
+    public JobseekerProfileDTO updateBasicInfo(String email, JobseekerBasicInfoRequest request) {
+        Jobseeker jobseeker = resolveJobseeker(email);
+
+        if (request.getFullName() != null)          jobseeker.setFullName(request.getFullName());
+        if (request.getPhone() != null)             jobseeker.setPhone(request.getPhone());
+        if (request.getHeadline() != null)          jobseeker.setHeadline(request.getHeadline());
+        if (request.getSummary() != null)           jobseeker.setSummary(request.getSummary());
+        if (request.getLinkedinUrl() != null)       jobseeker.setLinkedinUrl(request.getLinkedinUrl());
+        if (request.getGithubUrl() != null)         jobseeker.setGithubUrl(request.getGithubUrl());
+        if (request.getPortfolioUrl() != null)      jobseeker.setPortfolioUrl(request.getPortfolioUrl());
+        if (request.getYearsOfExperience() != null) jobseeker.setYearsOfExperience(request.getYearsOfExperience());
+        if (request.getIsOnCareerBreak() != null)   jobseeker.setIsOnCareerBreak(request.getIsOnCareerBreak());
+
+        recalculateCompletion(jobseeker);
+        jobseekerRepository.save(jobseeker);
+
+        return getFullProfile(email);
+    }
+
+    // ─────────────────────────────────────────────
+    // File uploads
+    // ─────────────────────────────────────────────
+
+    @Transactional
+    public String uploadResume(String email, MultipartFile file) {
+        Jobseeker jobseeker = resolveJobseeker(email);
+
+        if (jobseeker.getResumeUrl() != null) {
+            r2StorageService.delete(jobseeker.getResumeUrl());
+        }
+
+        String url = r2StorageService.uploadResume(file, jobseeker.getUserId());
+        jobseeker.setResumeUrl(url);
+        jobseeker.setResumeFileName(file.getOriginalFilename());
+
+        recalculateCompletion(jobseeker);
+        jobseekerRepository.save(jobseeker);
+
+        log.info("Resume uploaded for: {}", email);
+        return url;
+    }
+
+    @Transactional
+    public String uploadProfilePhoto(String email, MultipartFile file) {
+        Jobseeker jobseeker = resolveJobseeker(email);
+
+        if (jobseeker.getProfilePhotoUrl() != null) {
+            r2StorageService.delete(jobseeker.getProfilePhotoUrl());
+        }
+
+        String url = r2StorageService.uploadProfilePhoto(file, jobseeker.getUserId());
+        jobseeker.setProfilePhotoUrl(url);
+
+        recalculateCompletion(jobseeker);
+        jobseekerRepository.save(jobseeker);
+
+        log.info("Profile photo uploaded for: {}", email);
+        return url;
+    }
+
+    // ─────────────────────────────────────────────
+    // Profile completion
+    // ─────────────────────────────────────────────
+
+    void recalculateCompletion(Jobseeker jobseeker) {
+        int score = 0;
+
+        if (isNotEmpty(jobseeker.getFullName()))        score += 15;
+        if (isNotEmpty(jobseeker.getHeadline()))        score += 10;
+        if (isNotEmpty(jobseeker.getSummary()))         score += 10;
+        if (isNotEmpty(jobseeker.getPhone()))           score += 5;
+        if (isNotEmpty(jobseeker.getProfilePhotoUrl())) score += 10;
+        if (isNotEmpty(jobseeker.getResumeUrl()))       score += 20;
+        if (isNotEmpty(jobseeker.getLinkedinUrl()))     score += 5;
+
+        if (!workExperienceRepository
+                .findByJobseekerIdOrderByDisplayOrderAscStartYearDesc(jobseeker.getId()).isEmpty()) score += 10;
+        if (!educationRepository
+                .findByJobseekerIdOrderByDisplayOrderAscEndYearDesc(jobseeker.getId()).isEmpty())   score += 10;
+        if (!skillRepository
+                .findByJobseekerIdOrderByDisplayOrderAsc(jobseeker.getId()).isEmpty())              score += 5;
+
+        jobseeker.setProfileCompletion(Math.min(score, 100));
+    }
+
+    // ─────────────────────────────────────────────
+    // Helpers
+    // ─────────────────────────────────────────────
+
+    public Jobseeker resolveJobseeker(String email) {
+        return jobseekerRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Jobseeker profile not found"));
+    }
+    private boolean isNotEmpty(String value) {
+        return value != null && !value.isBlank();
+    }
+
+    private WorkExperienceDTO toWorkExpDTO(WorkExperience e) {
+        return WorkExperienceDTO.builder()
+                .id(e.getId()).company(e.getCompany()).title(e.getTitle())
+                .location(e.getLocation()).employmentType(e.getEmploymentType())
+                .startMonth(e.getStartMonth()).startYear(e.getStartYear())
+                .endMonth(e.getEndMonth()).endYear(e.getEndYear())
+                .isCurrent(e.getIsCurrent()).description(e.getDescription())
+                .skillsUsed(e.getSkillsUsed()).displayOrder(e.getDisplayOrder())
+                .build();
+    }
+
+    private EducationDTO toEducationDTO(Education e) {
+        return EducationDTO.builder()
+                .id(e.getId()).institution(e.getInstitution()).degree(e.getDegree())
+                .fieldOfStudy(e.getFieldOfStudy()).startYear(e.getStartYear())
+                .endYear(e.getEndYear()).grade(e.getGrade()).gradeType(e.getGradeType())
+                .description(e.getDescription()).displayOrder(e.getDisplayOrder())
+                .build();
+    }
+
+    private SkillDTO toSkillDTO(Skill s) {
+        return SkillDTO.builder()
+                .id(s.getId()).name(s.getName())
+                .proficiencyLevel(s.getProficiencyLevel())
+                .yearsOfExperience(s.getYearsOfExperience())
+                .displayOrder(s.getDisplayOrder())
+                .build();
+    }
+
+    private ProjectDTO toProjectDTO(Project p) {
+        return ProjectDTO.builder()
+                .id(p.getId()).title(p.getTitle()).description(p.getDescription())
+                .techStack(p.getTechStack()).projectUrl(p.getProjectUrl()).repoUrl(p.getRepoUrl())
+                .startMonth(p.getStartMonth()).startYear(p.getStartYear())
+                .endMonth(p.getEndMonth()).endYear(p.getEndYear())
+                .isOngoing(p.getIsOngoing()).displayOrder(p.getDisplayOrder())
+                .build();
+    }
+
+    private CertificationDTO toCertDTO(Certification c) {
+        return CertificationDTO.builder()
+                .id(c.getId()).name(c.getName()).issuer(c.getIssuer())
+                .issueMonth(c.getIssueMonth()).issueYear(c.getIssueYear())
+                .expiryMonth(c.getExpiryMonth()).expiryYear(c.getExpiryYear())
+                .doesNotExpire(c.getDoesNotExpire()).credentialId(c.getCredentialId())
+                .credentialUrl(c.getCredentialUrl()).displayOrder(c.getDisplayOrder())
+                .build();
+    }
+}
+</file>
+
+<file path="service/ProjectService.java">
+package com.iitbase.jobseeker.service;
+
+import com.iitbase.exception.ResourceNotFoundException;
+import com.iitbase.jobseeker.dto.ProjectDTO;
+import com.iitbase.jobseeker.model.Jobseeker;
+import com.iitbase.jobseeker.model.Project;
+import com.iitbase.jobseeker.repository.ProjectRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class ProjectService {
+
+    private final ProjectRepository projectRepository;
+    private final JobseekerProfileService profileService;
+
+    @Transactional(readOnly = true)
+    public List<ProjectDTO> getAll(String email) {
+        Jobseeker jobseeker = profileService.resolveJobseeker(email);
+        return projectRepository
+                .findByJobseekerIdOrderByDisplayOrderAscStartYearDesc(jobseeker.getId())
+                .stream().map(this::toDTO).toList();
+    }
+
+    @Transactional
+    public ProjectDTO add(String email, ProjectDTO dto) {
+        Jobseeker jobseeker = profileService.resolveJobseeker(email);
+
+        Project entity = Project.builder()
+                .jobseekerId(jobseeker.getId())
+                .title(dto.getTitle())
+                .description(dto.getDescription())
+                .techStack(dto.getTechStack())
+                .projectUrl(dto.getProjectUrl())
+                .repoUrl(dto.getRepoUrl())
+                .startMonth(dto.getStartMonth())
+                .startYear(dto.getStartYear())
+                .endMonth(dto.getEndMonth())
+                .endYear(dto.getEndYear())
+                .isOngoing(Boolean.TRUE.equals(dto.getIsOngoing()))
+                .displayOrder(dto.getDisplayOrder())
+                .build();
+
+        return toDTO(projectRepository.save(entity));
+    }
+
+    @Transactional
+    public ProjectDTO update(String email, Long id, ProjectDTO dto) {
+        Jobseeker jobseeker = profileService.resolveJobseeker(email);
+        if (!projectRepository.existsByIdAndJobseekerId(id, jobseeker.getId())) {
+            throw new ResourceNotFoundException("Project not found");
+        }
+
+        Project entity = projectRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+
+        entity.setTitle(dto.getTitle());
+        entity.setDescription(dto.getDescription());
+        entity.setTechStack(dto.getTechStack());
+        entity.setProjectUrl(dto.getProjectUrl());
+        entity.setRepoUrl(dto.getRepoUrl());
+        entity.setStartMonth(dto.getStartMonth());
+        entity.setStartYear(dto.getStartYear());
+        entity.setEndMonth(dto.getEndMonth());
+        entity.setEndYear(dto.getEndYear());
+        entity.setIsOngoing(Boolean.TRUE.equals(dto.getIsOngoing()));
+        entity.setDisplayOrder(dto.getDisplayOrder());
+
+        return toDTO(projectRepository.save(entity));
+    }
+
+    @Transactional
+    public void delete(String email, Long id) {
+        Jobseeker jobseeker = profileService.resolveJobseeker(email);
+        if (!projectRepository.existsByIdAndJobseekerId(id, jobseeker.getId())) {
+            throw new ResourceNotFoundException("Project not found");
+        }
+        projectRepository.deleteById(id);
+    }
+
+    private ProjectDTO toDTO(Project p) {
+        return ProjectDTO.builder()
+                .id(p.getId()).title(p.getTitle()).description(p.getDescription())
+                .techStack(p.getTechStack()).projectUrl(p.getProjectUrl()).repoUrl(p.getRepoUrl())
+                .startMonth(p.getStartMonth()).startYear(p.getStartYear())
+                .endMonth(p.getEndMonth()).endYear(p.getEndYear())
+                .isOngoing(p.getIsOngoing()).displayOrder(p.getDisplayOrder())
+                .build();
+    }
+}
+</file>
+
+<file path="service/SkillService.java">
+package com.iitbase.jobseeker.service;
+
+import com.iitbase.exception.ResourceNotFoundException;
+import com.iitbase.jobseeker.dto.SkillDTO;
+import com.iitbase.jobseeker.model.Jobseeker;
+import com.iitbase.jobseeker.model.Skill;
+import com.iitbase.jobseeker.repository.SkillRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class SkillService {
+
+    private final SkillRepository skillRepository;
+    private final JobseekerProfileService profileService;
+
+    @Transactional(readOnly = true)
+    public List<SkillDTO> getAll(String email) {
+        Jobseeker jobseeker = profileService.resolveJobseeker(email);
+        return skillRepository.findByJobseekerIdOrderByDisplayOrderAsc(jobseeker.getId())
+                .stream().map(this::toDTO).toList();
+    }
+
+    @Transactional
+    public SkillDTO add(String email, SkillDTO dto) {
+        Jobseeker jobseeker = profileService.resolveJobseeker(email);
+
+        Skill entity = Skill.builder()
+                .jobseekerId(jobseeker.getId())
+                .name(dto.getName())
+                .proficiencyLevel(dto.getProficiencyLevel())
+                .yearsOfExperience(dto.getYearsOfExperience())
+                .displayOrder(dto.getDisplayOrder())
+                .build();
+
+        Skill saved = skillRepository.save(entity);
+        profileService.recalculateCompletion(jobseeker);
+        return toDTO(saved);
+    }
+
+    @Transactional
+    public SkillDTO update(String email, Long id, SkillDTO dto) {
+        Jobseeker jobseeker = profileService.resolveJobseeker(email);
+        if (!skillRepository.existsByIdAndJobseekerId(id, jobseeker.getId())) {
+            throw new ResourceNotFoundException("Skill not found");
+        }
+
+        Skill entity = skillRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Skill not found"));
+
+        entity.setName(dto.getName());
+        entity.setProficiencyLevel(dto.getProficiencyLevel());
+        entity.setYearsOfExperience(dto.getYearsOfExperience());
+        entity.setDisplayOrder(dto.getDisplayOrder());
+
+        return toDTO(skillRepository.save(entity));
+    }
+
+    @Transactional
+    public void delete(String email, Long id) {
+        Jobseeker jobseeker = profileService.resolveJobseeker(email);
+        if (!skillRepository.existsByIdAndJobseekerId(id, jobseeker.getId())) {
+            throw new ResourceNotFoundException("Skill not found");
+        }
+        skillRepository.deleteById(id);
+        profileService.recalculateCompletion(jobseeker);
+    }
+
+    private SkillDTO toDTO(Skill s) {
+        return SkillDTO.builder()
+                .id(s.getId()).name(s.getName())
+                .proficiencyLevel(s.getProficiencyLevel())
+                .yearsOfExperience(s.getYearsOfExperience())
+                .displayOrder(s.getDisplayOrder())
+                .build();
+    }
+}
+</file>
+
+<file path="service/WorkExperienceService.java">
+package com.iitbase.jobseeker.service;
+
+import com.iitbase.exception.ResourceNotFoundException;
+import com.iitbase.jobseeker.dto.WorkExperienceDTO;
+import com.iitbase.jobseeker.model.Jobseeker;
+import com.iitbase.jobseeker.model.WorkExperience;
+import com.iitbase.jobseeker.repository.WorkExperienceRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class WorkExperienceService {
+
+    private final WorkExperienceRepository workExperienceRepository;
+    private final JobseekerProfileService profileService;
+
+    @Transactional(readOnly = true)
+    public List<WorkExperienceDTO> getAll(String email) {
+        Jobseeker jobseeker = profileService.resolveJobseeker(email);
+        return workExperienceRepository
+                .findByJobseekerIdOrderByDisplayOrderAscStartYearDesc(jobseeker.getId())
+                .stream().map(this::toDTO).toList();
+    }
+
+    @Transactional
+    public WorkExperienceDTO add(String email, WorkExperienceDTO dto) {
+        Jobseeker jobseeker = profileService.resolveJobseeker(email);
+        validateDates(dto);
+
+        WorkExperience entity = WorkExperience.builder()
+                .jobseekerId(jobseeker.getId())
+                .company(dto.getCompany())
+                .title(dto.getTitle())
+                .location(dto.getLocation())
+                .employmentType(dto.getEmploymentType())
+                .startMonth(dto.getStartMonth())
+                .startYear(dto.getStartYear())
+                .endMonth(dto.getEndMonth())
+                .endYear(dto.getEndYear())
+                .isCurrent(Boolean.TRUE.equals(dto.getIsCurrent()))
+                .description(dto.getDescription())
+                .skillsUsed(dto.getSkillsUsed())
+                .displayOrder(dto.getDisplayOrder())
+                .build();
+
+        WorkExperience saved = workExperienceRepository.save(entity);
+        profileService.recalculateCompletion(jobseeker);
+
+        log.info("Work experience added for jobseeker: {}", jobseeker.getId());
+        return toDTO(saved);
+    }
+
+    @Transactional
+    public WorkExperienceDTO update(String email, Long id, WorkExperienceDTO dto) {
+        Jobseeker jobseeker = profileService.resolveJobseeker(email);
+        validateOwnership(id, jobseeker.getId());
+        validateDates(dto);
+
+        WorkExperience entity = workExperienceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Work experience not found"));
+
+        entity.setCompany(dto.getCompany());
+        entity.setTitle(dto.getTitle());
+        entity.setLocation(dto.getLocation());
+        entity.setEmploymentType(dto.getEmploymentType());
+        entity.setStartMonth(dto.getStartMonth());
+        entity.setStartYear(dto.getStartYear());
+        entity.setEndMonth(dto.getEndMonth());
+        entity.setEndYear(dto.getEndYear());
+        entity.setIsCurrent(Boolean.TRUE.equals(dto.getIsCurrent()));
+        entity.setDescription(dto.getDescription());
+        entity.setSkillsUsed(dto.getSkillsUsed());
+        entity.setDisplayOrder(dto.getDisplayOrder());
+
+        return toDTO(workExperienceRepository.save(entity));
+    }
+
+    @Transactional
+    public void delete(String email, Long id) {
+        Jobseeker jobseeker = profileService.resolveJobseeker(email);
+        validateOwnership(id, jobseeker.getId());
+        workExperienceRepository.deleteById(id);
+        profileService.recalculateCompletion(jobseeker);
+        log.info("Work experience {} deleted for jobseeker: {}", id, jobseeker.getId());
+    }
+
+    private void validateDates(WorkExperienceDTO dto) {
+        if (Boolean.TRUE.equals(dto.getIsCurrent()) && dto.getEndYear() != null) {
+            throw new IllegalArgumentException("Current job cannot have an end date");
+        }
+        if (!Boolean.TRUE.equals(dto.getIsCurrent()) && dto.getEndYear() == null) {
+            throw new IllegalArgumentException("End year is required for past jobs");
+        }
+    }
+
+    private void validateOwnership(Long recordId, Long jobseekerId) {
+        if (!workExperienceRepository.existsByIdAndJobseekerId(recordId, jobseekerId)) {
+            throw new ResourceNotFoundException("Work experience not found");
+        }
+    }
+
+    private WorkExperienceDTO toDTO(WorkExperience e) {
+        return WorkExperienceDTO.builder()
+                .id(e.getId()).company(e.getCompany()).title(e.getTitle())
+                .location(e.getLocation()).employmentType(e.getEmploymentType())
+                .startMonth(e.getStartMonth()).startYear(e.getStartYear())
+                .endMonth(e.getEndMonth()).endYear(e.getEndYear())
+                .isCurrent(e.getIsCurrent()).description(e.getDescription())
+                .skillsUsed(e.getSkillsUsed()).displayOrder(e.getDisplayOrder())
+                .build();
+    }
+}
+</file>
+
+<file path="storage/R2StorageService.java">
+package com.iitbase.jobseeker.storage;
+
+import jakarta.annotation.PreDestroy;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.Set;
+import java.util.UUID;
+
+@Slf4j
+@Service
+public class R2StorageService {
+
+    private final S3Client s3Client;
+    private final String bucket;
+    private final String publicBaseUrl;
+
+    // Limits
+    private static final long MAX_RESUME_SIZE = 5 * 1024 * 1024; // 5MB
+    private static final long MAX_PHOTO_SIZE  = 2 * 1024 * 1024; // 2MB
+
+    // Allowed types
+    private static final Set<String> ALLOWED_RESUME_TYPES =
+            Set.of("application/pdf");
+
+    private static final Set<String> ALLOWED_PHOTO_TYPES =
+            Set.of("image/jpeg", "image/png", "image/webp");
+
+    private static final Set<String> ALLOWED_PHOTO_EXT =
+            Set.of("jpg", "jpeg", "png", "webp");
+
+    public R2StorageService(
+            @Value("${r2.account-id}") String accountId,
+            @Value("${r2.access-key}") String accessKey,
+            @Value("${r2.secret-key}") String secretKey,
+            @Value("${r2.bucket}") String bucket,
+            @Value("${r2.public-url}") String publicUrl
+    ) {
+
+        this.bucket = bucket;
+        this.publicBaseUrl = normalizeUrl(publicUrl);
+
+        this.s3Client = S3Client.builder()
+                .endpointOverride(
+                        URI.create("https://" + accountId + ".r2.cloudflarestorage.com")
+                )
+                .credentialsProvider(
+                        StaticCredentialsProvider.create(
+                                AwsBasicCredentials.create(accessKey, secretKey)
+                        )
+                )
+                .region(Region.of("auto"))
+                .build();
+    }
+
+    // -------------------------
+    // Upload Resume
+    // -------------------------
+
+    public String uploadResume(MultipartFile file, Long userId) {
+
+        validateFile(file, MAX_RESUME_SIZE, ALLOWED_RESUME_TYPES, "Resume");
+
+        String key = String.format(
+                "resumes/%d/%s.pdf",
+                userId,
+                UUID.randomUUID()
+        );
+
+        return upload(file, key);
+    }
+
+    // -------------------------
+    // Upload Profile Photo
+    // -------------------------
+
+    public String uploadProfilePhoto(MultipartFile file, Long userId) {
+
+        validateFile(file, MAX_PHOTO_SIZE, ALLOWED_PHOTO_TYPES, "Profile photo");
+
+        String ext = getExtension(file.getOriginalFilename());
+
+        if (!ALLOWED_PHOTO_EXT.contains(ext)) {
+            throw new IllegalArgumentException("Invalid image extension: " + ext);
+        }
+
+        String key = String.format(
+                "photos/%d/%s.%s",
+                userId,
+                UUID.randomUUID(),
+                ext
+        );
+
+        return upload(file, key);
+    }
+
+    // -------------------------
+    // Delete Object
+    // -------------------------
+
+    public void delete(String fileUrl) {
+
+        if (fileUrl == null || !fileUrl.startsWith(publicBaseUrl)) {
+            return;
+        }
+
+        String key = fileUrl.substring(publicBaseUrl.length());
+
+        try {
+
+            s3Client.deleteObject(
+                    DeleteObjectRequest.builder()
+                            .bucket(bucket)
+                            .key(key)
+                            .build()
+            );
+
+            log.debug("Deleted R2 object: {}", key);
+
+        } catch (Exception ex) {
+
+            log.warn(
+                    "Failed deleting R2 object {} : {}",
+                    key,
+                    ex.getMessage()
+            );
+        }
+    }
+
+    // -------------------------
+    // Core Upload Method
+    // -------------------------
+
+    private String upload(MultipartFile file, String key) {
+
+        try {
+
+            PutObjectRequest request =
+                    PutObjectRequest.builder()
+                            .bucket(bucket)
+                            .key(key)
+                            .contentType(file.getContentType())
+                            .cacheControl("public, max-age=31536000")
+                            .build();
+
+            s3Client.putObject(
+                    request,
+                    RequestBody.fromInputStream(
+                            file.getInputStream(),
+                            file.getSize()
+                    )
+            );
+
+            log.debug("Uploaded to R2: {}", key);
+
+            return publicBaseUrl + key;
+
+        } catch (IOException ex) {
+
+            throw new RuntimeException(
+                    "Failed reading uploaded file",
+                    ex
+            );
+
+        } catch (Exception ex) {
+
+            throw new RuntimeException(
+                    "R2 upload failed: " + ex.getMessage(),
+                    ex
+            );
+        }
+    }
+
+    // -------------------------
+    // Validation
+    // -------------------------
+
+    private void validateFile(
+            MultipartFile file,
+            long maxSize,
+            Set<String> allowedTypes,
+            String label
+    ) {
+
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException(label + " file is empty");
+        }
+
+        if (file.getSize() > maxSize) {
+            throw new IllegalArgumentException(
+                    label + " exceeds maximum allowed size of "
+                            + (maxSize / 1024 / 1024) + "MB"
+            );
+        }
+
+        if (!allowedTypes.contains(file.getContentType())) {
+            throw new IllegalArgumentException(
+                    label + " type not allowed. Allowed: " + allowedTypes
+            );
+        }
+    }
+
+    // -------------------------
+    // Helpers
+    // -------------------------
+
+    private String getExtension(String filename) {
+
+        if (filename == null || !filename.contains(".")) {
+            return "jpg";
+        }
+
+        return filename
+                .substring(filename.lastIndexOf('.') + 1)
+                .toLowerCase();
+    }
+
+    private String normalizeUrl(String url) {
+
+        return url.endsWith("/") ? url : url + "/";
+    }
+
+    @PreDestroy
+    public void shutdown() {
+
+        try {
+            s3Client.close();
+        } catch (Exception ignored) {
+        }
+    }
+}
+</file>
+
+</files>

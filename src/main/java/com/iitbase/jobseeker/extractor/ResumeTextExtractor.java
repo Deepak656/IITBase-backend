@@ -1,0 +1,85 @@
+package com.iitbase.jobseeker.extractor;
+
+import lombok.extern.slf4j.Slf4j;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+/**
+ * Extracts plain text from a resume file stream.
+ * Supports PDF and DOCX — the two formats IIT resumes realistically come in.
+ *
+ * Text quality here directly affects parse quality. PDFBox handles
+ * LaTeX-generated PDFs (common with IIT resumes) better than most alternatives.
+ */
+@Slf4j
+@Component
+public class ResumeTextExtractor {
+
+    private static final int MAX_CHARS = 12_000; // ~3 dense resume pages — enough context for LLM
+
+    public String extract(InputStream inputStream, String contentType) throws IOException {
+        String raw = switch (contentType) {
+            case "application/pdf"                                                  -> extractPdf(inputStream);
+            case "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                 "application/msword"                                               -> extractDocx(inputStream);
+            default -> throw new IllegalArgumentException(
+                    "Unsupported resume format: " + contentType + ". Only PDF and DOCX are supported."
+            );
+        };
+
+        String cleaned = clean(raw);
+        log.debug("Extracted {} chars from resume (type={})", cleaned.length(), contentType);
+        return cleaned;
+    }
+
+    // ─────────────────────────────────────────────
+    // PDF — handles LaTeX, Overleaf, Google Docs exports
+    // ─────────────────────────────────────────────
+
+    private String extractPdf(InputStream inputStream) throws IOException {
+        byte[] bytes = inputStream.readAllBytes();
+        try (PDDocument document = Loader.loadPDF(bytes)) {
+            PDFTextStripper stripper = new PDFTextStripper();
+            stripper.setSortByPosition(true);
+            return stripper.getText(document);
+        }
+    }
+    // ─────────────────────────────────────────────
+    // DOCX — handles Word, Google Docs .docx export
+    // ─────────────────────────────────────────────
+
+    private String extractDocx(InputStream inputStream) throws IOException {
+        try (XWPFDocument document = new XWPFDocument(inputStream);
+             XWPFWordExtractor extractor = new XWPFWordExtractor(document)) {
+            return extractor.getText();
+        }
+    }
+
+    // ─────────────────────────────────────────────
+    // Normalize whitespace, strip junk, truncate
+    // ─────────────────────────────────────────────
+
+    private String clean(String raw) {
+        if (raw == null) return "";
+
+        String cleaned = raw
+                .replaceAll("\r\n", "\n")
+                .replaceAll("\r", "\n")
+                .replaceAll("[ \\t]+", " ")          // collapse horizontal whitespace
+                .replaceAll("\\n{3,}", "\n\n")        // max 2 consecutive blank lines
+                .replaceAll("[^\\x20-\\x7E\\n]", " ") // strip non-ASCII (common in PDF artifacts)
+                .trim();
+
+        // Truncate to MAX_CHARS — LLM context window + cost control
+        return cleaned.length() > MAX_CHARS
+                ? cleaned.substring(0, MAX_CHARS)
+                : cleaned;
+    }
+}

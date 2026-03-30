@@ -84,3 +84,9 @@ management:
       enabled: true
     db:
       enabled: true
+llm:
+  provider: openai   # switch to 'openai' when OpenAiResumeParser is added
+anthropic:
+  api-key: ${ANTHROPIC_API_KEY}  # set in Railway env vars
+openai:
+  api-key: ${OPENAI_API_KEY}
