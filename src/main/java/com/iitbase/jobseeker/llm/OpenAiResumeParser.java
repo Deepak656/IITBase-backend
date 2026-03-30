@@ -23,7 +23,7 @@ import java.util.Map;
  */
 @Slf4j
 @Component
-@ConditionalOnProperty(name = "llm.provider", havingValue = "openai")
+@ConditionalOnProperty(name = "llm.provider", havingValue = "openai", matchIfMissing = true)
 @RequiredArgsConstructor
 public class OpenAiResumeParser implements LlmResumeParser {
 

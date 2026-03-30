@@ -24,7 +24,7 @@ import java.util.Map;
  */
 @Slf4j
 @Component
-@ConditionalOnProperty(name = "llm.provider", havingValue = "anthropic", matchIfMissing = true)
+@ConditionalOnProperty(name = "llm.provider", havingValue = "anthropic")
 @RequiredArgsConstructor
 public class AnthropicResumeParser implements LlmResumeParser {
 
