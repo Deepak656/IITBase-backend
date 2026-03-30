@@ -32,8 +32,10 @@ public class EmailService {
             log.info("[EMAIL SUPPRESSED - OTP] to={} purpose={} otp={}", to, purpose, otp);
             return;
         }
-        String subject = otpTemplate.subject(purpose);
-        deliver(to, subject, otpTemplate.html(otp, subject), otpTemplate.text(otp));
+        deliver(to,
+                otpTemplate.subject(otp, purpose),
+                otpTemplate.html(otp, purpose),
+                otpTemplate.text(otp, purpose));
     }
 
     // ── Jobseeker ─────────────────────────────────────────────────────────
@@ -58,7 +60,7 @@ public class EmailService {
                                         String invitedByName, String token) {
         String link = baseUrl + "/recruiter/invite?token=" + token;
         deliver(to,
-                "You've been invited to join " + companyName + " on IITBase",
+                invitedByName + " invited you to join " + companyName + " on IITBase",
                 recruiterTemplate.teamInviteHtml(companyName, invitedByName, link),
                 recruiterTemplate.teamInviteText(companyName, invitedByName, link));
     }
@@ -124,7 +126,7 @@ public class EmailService {
                 staffTemplate.acceptedText(acceptedByEmail));
     }
 
-    // ── Private delivery — events toggle applied here ─────────────────────
+    // ── Private delivery ──────────────────────────────────────────────────
 
     private void deliver(String to, String subject, String html, String text) {
         if (!toggleConfig.canSendEvents()) {
