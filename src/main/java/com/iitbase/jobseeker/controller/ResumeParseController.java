@@ -1,6 +1,7 @@
 package com.iitbase.jobseeker.controller;
 
 import com.iitbase.common.ApiResponse;
+import com.iitbase.common.MemoryLogger;
 import com.iitbase.jobseeker.dto.ResumeParseResponseDTO;
 import com.iitbase.jobseeker.service.ResumeParseService;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class ResumeParseController {
     @PostMapping("/parse")
     public ResponseEntity<ApiResponse<ResumeParseResponseDTO>> parse(Authentication auth) {
         log.info("Resume parse requested by: {}", auth.getName());
+        MemoryLogger.log("BEFORE_PARSE");
         ResumeParseResponseDTO parsed = resumeParseService.parseUploadedResume(auth.getName());
         return ResponseEntity.ok(ApiResponse.success(parsed, "Resume parsed successfully"));
     }

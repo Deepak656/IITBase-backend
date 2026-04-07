@@ -1,6 +1,5 @@
 package com.iitbase.config;
 
-import io.netty.handler.codec.http.HttpMethod;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -35,8 +34,7 @@ public class SecurityConfig {
                                 "/api/public/**",
                                 "/api/jobs/**",          // job listings should be public
                                 "/api/companies/**",      // public company profiles
-                                "/api/auth/health/redis", // redis health check
-                                "/actuator/**"
+                                "/api/auth/health/redis" // redis health check
                         ).permitAll()
                         // Admin staff invite and accept public url
                         .requestMatchers("/api/admin/staff/invite/validate").permitAll()
@@ -62,7 +60,17 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/admin/**"
                         ).hasRole("ADMIN")
-
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/swagger-ui/index.html",
+                                "/swagger-resources/**",
+                                "/webjars/**",
+                                "/error"
+                        ).permitAll()
+                        .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                        .requestMatchers("/actuator/**").hasRole("ADMIN")
                         // 🔒 Everything else
                         .anyRequest().authenticated()
                 )

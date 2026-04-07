@@ -7,21 +7,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Resume parser backed by Anthropic's Claude API.
- *
- * Active when: llm.provider=anthropic (default)
- * Swap to OpenAI by setting llm.provider=openai and adding OpenAiResumeParser.
- */
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "llm.provider", havingValue = "anthropic")
@@ -29,14 +22,16 @@ import java.util.Map;
 public class AnthropicResumeParser implements LlmResumeParser {
 
     private static final String ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
-    private static final String MODEL             = "claude-haiku-4-5-20251001"; // fast + cheap for parsing
-    private static final int    MAX_TOKENS        = 4096;
+    private static final String MODEL = "claude-haiku-4-5-20251001";
+    private static final int MAX_TOKENS = 4096;
 
     @Value("${anthropic.api-key}")
     private String apiKey;
 
     private final ObjectMapper objectMapper;
-    private final WebClient.Builder webClientBuilder;
+
+    // Reuse single instance
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @Override
     public ResumeParseResponseDTO parse(String resumeText) {
@@ -46,7 +41,7 @@ public class AnthropicResumeParser implements LlmResumeParser {
     }
 
     // ─────────────────────────────────────────────
-    // API call
+    // API call (RestTemplate)
     // ─────────────────────────────────────────────
 
     private String callApi(String prompt) {
@@ -59,18 +54,27 @@ public class AnthropicResumeParser implements LlmResumeParser {
         );
 
         try {
-            String response = webClientBuilder.build()
-                    .post()
-                    .uri(ANTHROPIC_API_URL)
-                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                    .header("x-api-key", apiKey)
-                    .header("anthropic-version", "2023-06-01")
-                    .bodyValue(requestBody)
-                    .retrieve()
-                    .bodyToMono(String.class)
-                    .block();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("x-api-key", apiKey);
+            headers.set("anthropic-version", "2023-06-01");
 
-            JsonNode root = objectMapper.readTree(response);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    ANTHROPIC_API_URL,
+                    HttpMethod.POST,
+                    entity,
+                    String.class
+            );
+
+            String body = response.getBody();
+
+            if (body == null || body.isBlank()) {
+                throw new ResumeParseException("Empty response from AI service");
+            }
+
+            JsonNode root = objectMapper.readTree(body);
             return root.at("/content/0/text").asText();
 
         } catch (Exception e) {
@@ -85,7 +89,6 @@ public class AnthropicResumeParser implements LlmResumeParser {
 
     private ResumeParseResponseDTO deserialize(String rawJson) {
         try {
-            // Strip markdown fences if the model hallucinated them despite the prompt
             String clean = rawJson
                     .replaceAll("(?s)```json\\s*", "")
                     .replaceAll("(?s)```\\s*", "")
@@ -218,6 +221,7 @@ public class AnthropicResumeParser implements LlmResumeParser {
         }
         return list;
     }
+
     private ResumeParseResponseDTO.ParsedJobPreference parseJobPreference(JsonNode node) {
         if (node.isMissingNode() || node.isNull()) return null;
         return ResumeParseResponseDTO.ParsedJobPreference.builder()
@@ -226,9 +230,7 @@ public class AnthropicResumeParser implements LlmResumeParser {
                 .build();
     }
 
-    // ─────────────────────────────────────────────
-    // Safe node readers — null instead of exception
-    // ─────────────────────────────────────────────
+    // Safe helpers
 
     private String text(JsonNode node, String field) {
         JsonNode n = node.path(field);

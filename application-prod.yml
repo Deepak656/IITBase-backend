@@ -32,3 +32,8 @@ anthropic:
   api-key: ${ANTHROPIC_API_KEY}  # set in Railway env vars
 openai:
   api-key: ${OPENAI_API_KEY}
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

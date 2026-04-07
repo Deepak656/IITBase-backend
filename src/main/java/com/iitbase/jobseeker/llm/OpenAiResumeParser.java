@@ -7,20 +7,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
 
-/**
- * OpenAI GPT-4o-mini implementation of LlmResumeParser.
- *
- * Activate by setting: llm.provider=openai
- * Uses gpt-4o-mini — cheaper than gpt-4o, still reliable for structured extraction.
- */
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "llm.provider", havingValue = "openai", matchIfMissing = true)
@@ -28,20 +21,21 @@ import java.util.Map;
 public class OpenAiResumeParser implements LlmResumeParser {
 
     private static final String OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
-    private static final String MODEL          = "gpt-4o-mini";
-    private static final int    MAX_TOKENS     = 4096;
+    private static final String MODEL = "gpt-4o-mini";
+    private static final int MAX_TOKENS = 4096;
 
     @Value("${openai.api-key}")
     private String apiKey;
 
     private final ObjectMapper objectMapper;
-    private final WebClient.Builder webClientBuilder;
+
+    // Reuse single instance (better than creating per request)
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @Override
     public ResumeParseResponseDTO parse(String resumeText) {
         String prompt = ResumeParsePrompt.build(resumeText);
         String rawJson = callApi(prompt);
-        // Reuse the same deserializer — JSON schema is provider-agnostic
         return deserialize(rawJson);
     }
 
@@ -57,17 +51,26 @@ public class OpenAiResumeParser implements LlmResumeParser {
         );
 
         try {
-            String response = webClientBuilder.build()
-                    .post()
-                    .uri(OPENAI_API_URL)
-                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
-                    .bodyValue(requestBody)
-                    .retrieve()
-                    .bodyToMono(String.class)
-                    .block();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(apiKey);
 
-            JsonNode root = objectMapper.readTree(response);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    OPENAI_API_URL,
+                    HttpMethod.POST,
+                    entity,
+                    String.class
+            );
+
+            String body = response.getBody();
+
+            if (body == null || body.isBlank()) {
+                throw new ResumeParseException("Empty response from AI service");
+            }
+
+            JsonNode root = objectMapper.readTree(body);
             return root.at("/choices/0/message/content").asText();
 
         } catch (Exception e) {
@@ -77,15 +80,12 @@ public class OpenAiResumeParser implements LlmResumeParser {
     }
 
     private ResumeParseResponseDTO deserialize(String rawJson) {
-        // Identical deserialization logic — extracted to a shared utility if both parsers
-        // are ever active simultaneously, but @ConditionalOnProperty ensures only one is.
         try {
             String clean = rawJson
                     .replaceAll("(?s)```json\\s*", "")
                     .replaceAll("(?s)```\\s*", "")
                     .trim();
 
-            // Delegate to Jackson — same schema as AnthropicResumeParser
             return objectMapper.readValue(clean, ResumeParseResponseDTO.class);
 
         } catch (Exception e) {

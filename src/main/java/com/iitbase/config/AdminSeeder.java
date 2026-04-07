@@ -16,19 +16,15 @@ import java.util.UUID;
 
 /**
  * Seeds the first IITBase admin account on startup.
- *
  * Set env var:  ADMIN_SEED_EMAIL=founder@iitbase.com
- *
  * On first boot:
  *   - Creates a User with role=ADMIN and a random unusable password
  *   - No JobseekerProfile created (bypasses the signup flow entirely)
  *   - Logs a clear message so you know it ran
- *
  * After that:
  *   - Go to /reset-password and request an OTP for your email
  *   - Set a real password
  *   - Done — you can now log in at /login
- *
  * Subsequent boots:
  *   - If the email already exists, does nothing (idempotent)
  *   - Safe to leave the env var set permanently

@@ -1,5 +1,6 @@
 package com.iitbase.jobseeker.extractor;
 
+import com.iitbase.common.MemoryLogger;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -8,8 +9,11 @@ import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 /**
  * Extracts plain text from a resume file stream.
@@ -25,6 +29,8 @@ public class ResumeTextExtractor {
     private static final int MAX_CHARS = 12_000; // ~3 dense resume pages — enough context for LLM
 
     public String extract(InputStream inputStream, String contentType) throws IOException {
+        MemoryLogger.log("BEFORE_TEXT_EXTRACTION");
+
         String raw = switch (contentType) {
             case "application/pdf"                                                  -> extractPdf(inputStream);
             case "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -36,6 +42,7 @@ public class ResumeTextExtractor {
 
         String cleaned = clean(raw);
         log.debug("Extracted {} chars from resume (type={})", cleaned.length(), contentType);
+        MemoryLogger.log("AFTER_TEXT_EXTRACTION");
         return cleaned;
     }
 
@@ -44,11 +51,14 @@ public class ResumeTextExtractor {
     // ─────────────────────────────────────────────
 
     private String extractPdf(InputStream inputStream) throws IOException {
-        byte[] bytes = inputStream.readAllBytes();
-        try (PDDocument document = Loader.loadPDF(bytes)) {
+        File tempFile = File.createTempFile("resume", ".pdf");
+        Files.copy(inputStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+        try (PDDocument document = Loader.loadPDF(tempFile)) {
             PDFTextStripper stripper = new PDFTextStripper();
-            stripper.setSortByPosition(true);
             return stripper.getText(document);
+        } finally {
+            tempFile.delete();
         }
     }
     // ─────────────────────────────────────────────

@@ -2,65 +2,83 @@ package com.iitbase.email.provider;
 
 import com.iitbase.email.EmailMessage;
 import com.iitbase.email.EmailProvider;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
 
 /**
- * Brevo (formerly Sendinblue) provider — https://brevo.com
- * Free tier: 300 emails/day, unlimited contacts.
- *
- * Activate via: email.provider=brevo
+ * Brevo (Sendinblue) Email Provider — REST (blocking)
  */
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "email.provider", havingValue = "brevo")
+@RequiredArgsConstructor
 public class BrevoEmailProvider implements EmailProvider {
 
-    private final WebClient webClient;
-    private final String fromEmail;
-    private final String fromName = "IITBase";
+    private static final String BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 
-    public BrevoEmailProvider(
-            @Value("${brevo.api-key:placeholder-not-set}") String apiKey,
-            @Value("${email.from:hello@iitbase.com}") String fromEmail
-    ) {
-        this.fromEmail = fromEmail;
-        this.webClient = WebClient.builder()
-                .baseUrl("https://api.brevo.com/v3")
-                .defaultHeader("api-key", apiKey)
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .build();
-    }
+    private final RestTemplate restTemplate;
+
+    @Value("${brevo.api-key:placeholder-not-set}")
+    private String apiKey;
+
+    @Value("${email.from:hello@iitbase.com}")
+    private String fromEmail;
+
+    private static final String FROM_NAME = "IITBase";
 
     @Override
     public void send(EmailMessage message) {
+
         Map<String, Object> payload = Map.of(
-                "sender", Map.of("name", fromName, "email", fromEmail),
-                "to", List.of(Map.of("email", message.getTo())),
+                "sender", Map.of(
+                        "name", FROM_NAME,
+                        "email", fromEmail
+                ),
+                "to", List.of(
+                        Map.of("email", message.getTo())
+                ),
                 "subject", message.getSubject(),
                 "htmlContent", message.getHtmlBody()
         );
 
         try {
-            webClient.post()
-                    .uri("/smtp/email")
-                    .bodyValue(payload)
-                    .retrieve()
-                    .toBodilessEntity()
-                    .block();
+            HttpEntity<Map<String, Object>> request =
+                    new HttpEntity<>(payload, buildHeaders());
 
-            log.debug("Email dispatched via Brevo to: {}", message.getTo());
+            restTemplate.exchange(
+                    BREVO_API_URL,
+                    HttpMethod.POST,
+                    request,
+                    Void.class
+            );
+
+            log.debug("Email sent via Brevo to: {}", message.getTo());
+
         } catch (Exception ex) {
-            log.error("Brevo failed for: {}", message.getTo(), ex);
-            throw new RuntimeException("Email delivery failed via Brevo: " + ex.getMessage(), ex);
+            log.error("Brevo email failed for: {}", message.getTo(), ex);
+            throw new RuntimeException(
+                    "Email delivery failed via Brevo",
+                    ex
+            );
         }
+    }
+
+    // ─────────────────────────────────────────────
+    // Headers builder (clean separation)
+    // ─────────────────────────────────────────────
+
+    private HttpHeaders buildHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("api-key", apiKey);
+        return headers;
     }
 }

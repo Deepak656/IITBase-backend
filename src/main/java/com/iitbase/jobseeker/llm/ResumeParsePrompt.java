@@ -2,10 +2,8 @@ package com.iitbase.jobseeker.llm;
 
 /**
  * Builds the LLM prompt for resume parsing.
- *
  * Kept in its own class because prompt iteration is frequent —
  * you don't want it buried inside a service method.
- *
  * The schema in the prompt must stay in sync with ResumeParseResponseDTO.
  */
 public final class ResumeParsePrompt {

@@ -4,7 +4,6 @@ import com.iitbase.jobseeker.dto.ResumeParseResponseDTO;
 
 /**
  * Contract for LLM-backed resume parsing.
- *
  * Implementations: AnthropicResumeParser, OpenAiResumeParser
  * Swap via @Primary or application.yml flag — no service layer changes needed.
  */

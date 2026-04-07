@@ -73,14 +73,20 @@ management:
   endpoints:
     web:
       exposure:
-        include: health, info
+        include: health, info, metrics, env, loggers
+
   endpoint:
     health:
       show-details: always
       probes:
-        enabled: true   # optional (for k8s readiness/liveness)
+        enabled: true
+
   health:
     redis:
       enabled: true
     db:
       enabled: true
+
+  metrics:
+    tags:
+      application: iitbase-backend
