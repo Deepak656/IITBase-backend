@@ -1,0 +1,39 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${PGHOST}:${PGPORT:5432}/${PGDATABASE}
+    username: ${PGUSER}
+    password: ${PGPASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+logging:
+  level:
+    com.iitbase: INFO
+    org.springframework.security: WARN
+    org.springframework.data.redis: DEBUG
+    io.lettuce.core: DEBUG
+
+email:
+  provider: resend
+  from: ${FROM_EMAIL:hello@iitbase.com}
+  enabled: ${EMAIL_ENABLED:true}
+  otp-enabled: ${EMAIL_OTP_ENABLED:true}
+  events-enabled: ${EMAIL_EVENTS_ENABLED:true}
+
+resend:
+  api-key: ${RESEND_API_KEY}
+
+llm:
+  provider: openai   # switch to 'openai' when OpenAiResumeParser is added
+anthropic:
+  api-key: ${ANTHROPIC_API_KEY}  # set in Railway env vars
+openai:
+  api-key: ${OPENAI_API_KEY}
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
