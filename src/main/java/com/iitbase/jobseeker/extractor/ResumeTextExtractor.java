@@ -18,7 +18,6 @@ import java.nio.file.StandardCopyOption;
 /**
  * Extracts plain text from a resume file stream.
  * Supports PDF and DOCX — the two formats IIT resumes realistically come in.
- *
  * Text quality here directly affects parse quality. PDFBox handles
  * LaTeX-generated PDFs (common with IIT resumes) better than most alternatives.
  */
@@ -26,44 +25,44 @@ import java.nio.file.StandardCopyOption;
 @Component
 public class ResumeTextExtractor {
 
-    private static final int MAX_CHARS = 12_000; // ~3 dense resume pages — enough context for LLM
+    private static final int MAX_CHARS = 12_000;
+    private static final PDFTextStripper STRIPPER;
+
+    static {
+        STRIPPER = new PDFTextStripper();
+        STRIPPER.setSortByPosition(true);
+    }
 
     public String extract(InputStream inputStream, String contentType) throws IOException {
         MemoryLogger.log("BEFORE_TEXT_EXTRACTION");
 
         String raw = switch (contentType) {
-            case "application/pdf"                                                  -> extractPdf(inputStream);
+            case "application/pdf" -> extractPdf(inputStream);
             case "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                 "application/msword"                                               -> extractDocx(inputStream);
+                 "application/msword" -> extractDocx(inputStream);
             default -> throw new IllegalArgumentException(
-                    "Unsupported resume format: " + contentType + ". Only PDF and DOCX are supported."
+                    "Unsupported resume format: " + contentType
             );
         };
 
         String cleaned = clean(raw);
-        log.debug("Extracted {} chars from resume (type={})", cleaned.length(), contentType);
+        log.debug("Extracted {} chars (type={})", cleaned.length(), contentType);
         MemoryLogger.log("AFTER_TEXT_EXTRACTION");
+        System.gc();
         return cleaned;
     }
-
-    // ─────────────────────────────────────────────
-    // PDF — handles LaTeX, Overleaf, Google Docs exports
-    // ─────────────────────────────────────────────
 
     private String extractPdf(InputStream inputStream) throws IOException {
         File tempFile = File.createTempFile("resume", ".pdf");
         Files.copy(inputStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
         try (PDDocument document = Loader.loadPDF(tempFile)) {
-            PDFTextStripper stripper = new PDFTextStripper();
-            return stripper.getText(document);
+            return STRIPPER.getText(document);
         } finally {
-            tempFile.delete();
+            Files.deleteIfExists(tempFile.toPath()); // safer than tempFile.delete()
+            System.gc();
         }
     }
-    // ─────────────────────────────────────────────
-    // DOCX — handles Word, Google Docs .docx export
-    // ─────────────────────────────────────────────
 
     private String extractDocx(InputStream inputStream) throws IOException {
         try (XWPFDocument document = new XWPFDocument(inputStream);
@@ -72,24 +71,15 @@ public class ResumeTextExtractor {
         }
     }
 
-    // ─────────────────────────────────────────────
-    // Normalize whitespace, strip junk, truncate
-    // ─────────────────────────────────────────────
-
     private String clean(String raw) {
         if (raw == null) return "";
-
         String cleaned = raw
                 .replaceAll("\r\n", "\n")
                 .replaceAll("\r", "\n")
-                .replaceAll("[ \\t]+", " ")          // collapse horizontal whitespace
-                .replaceAll("\\n{3,}", "\n\n")        // max 2 consecutive blank lines
-                .replaceAll("[^\\x20-\\x7E\\n]", " ") // strip non-ASCII (common in PDF artifacts)
+                .replaceAll("[ \\t]+", " ")
+                .replaceAll("\\n{3,}", "\n\n")
+                .replaceAll("[^\\x20-\\x7E\\n]", " ")
                 .trim();
-
-        // Truncate to MAX_CHARS — LLM context window + cost control
-        return cleaned.length() > MAX_CHARS
-                ? cleaned.substring(0, MAX_CHARS)
-                : cleaned;
+        return cleaned.length() > MAX_CHARS ? cleaned.substring(0, MAX_CHARS) : cleaned;
     }
 }
