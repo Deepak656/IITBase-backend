@@ -40,7 +40,6 @@ public class RedisConfig {
                 // ✅ SSL LAST
                 .useSsl()
                 .disablePeerVerification()
-
                 .build();
 
         return new LettuceConnectionFactory(redisConfig, clientConfig);
