@@ -70,7 +70,7 @@ public class SecurityConfig {
                                 "/error"
                         ).permitAll()
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                        .requestMatchers("/actuator/**").hasRole("ADMIN")
+                        .requestMatchers("/actuator/**").permitAll()
                         // 🔒 Everything else
                         .anyRequest().authenticated()
                 )
