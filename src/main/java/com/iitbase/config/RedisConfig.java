@@ -10,6 +10,8 @@ import org.springframework.data.redis.connection.lettuce.*;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import java.time.Duration;
+
 @Slf4j
 @Configuration
 public class RedisConfig {
@@ -24,8 +26,21 @@ public class RedisConfig {
         redisConfig.setPassword("gQAAAAAAAVX0AAIncDJmMzEwOGViYzJmMTg0YjFkOTY1ZGJjYmYxNjA2MDQxNHAyODc1NDA"); // 🔴 put real password here
 
         LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
+
+                // ✅ Put everything BEFORE useSsl()
+                .commandTimeout(Duration.ofSeconds(2))
+                .shutdownTimeout(Duration.ZERO)
+
+                .clientOptions(ClientOptions.builder()
+                        .autoReconnect(true)
+                        .disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS)
+                        .build()
+                )
+
+                // ✅ SSL LAST
                 .useSsl()
-                .disablePeerVerification()   // 🔥 THIS LINE FIXES YOUR ISSUE
+                .disablePeerVerification()
+
                 .build();
 
         return new LettuceConnectionFactory(redisConfig, clientConfig);
