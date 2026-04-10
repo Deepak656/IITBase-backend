@@ -98,3 +98,6 @@ management:
       all: true
     tags:
       application: iitbase-backend
+    export:
+      prometheus:
+        enabled: true

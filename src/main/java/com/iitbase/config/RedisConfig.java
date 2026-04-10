@@ -1,69 +1,77 @@
 package com.iitbase.config;
 
-import io.lettuce.core.ClientOptions;
-import io.lettuce.core.SslOptions;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.*;
-import org.springframework.data.redis.connection.lettuce.*;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import java.net.URI;
 import java.time.Duration;
 
 @Slf4j
 @Configuration
 public class RedisConfig {
 
+    @Value("${redis.url}")
+    private String redisUrl;
+
     @Bean
     public LettuceConnectionFactory redisConnectionFactory() {
+        URI uri = URI.create(redisUrl);
 
-        RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration();
-        redisConfig.setHostName("relaxed-airedale-87540.upstash.io");
-        redisConfig.setPort(6379);
-        redisConfig.setUsername("default");
-        redisConfig.setPassword("gQAAAAAAAVX0AAIncDJmMzEwOGViYzJmMTg0YjFkOTY1ZGJjYmYxNjA2MDQxNHAyODc1NDA"); // 🔴 put real password here
+        String scheme   = uri.getScheme();          // "redis" or "rediss"
+        String host     = uri.getHost();
+        int    port     = uri.getPort() == -1 ? 6379 : uri.getPort();
+        String userInfo = uri.getUserInfo();         // "default:password" or null
 
-        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
+        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
+        config.setHostName(host);
+        config.setPort(port);
 
-                // ✅ Put everything BEFORE useSsl()
-                .commandTimeout(Duration.ofSeconds(2))
-                .shutdownTimeout(Duration.ZERO)
+        if (userInfo != null && userInfo.contains(":")) {
+            String[] parts = userInfo.split(":", 2);
+            if (!parts[0].isBlank()) config.setUsername(parts[0]);
+            if (!parts[1].isBlank()) config.setPassword(parts[1]);
+        }
 
-                .clientOptions(ClientOptions.builder()
-                        .autoReconnect(true)
-                        .disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS)
-                        .build()
-                )
+        boolean useSsl = "rediss".equalsIgnoreCase(scheme);
 
-                // ✅ SSL LAST
-                .useSsl()
-                .disablePeerVerification()
-                .build();
+        LettuceClientConfiguration.LettuceClientConfigurationBuilder builder =
+                LettuceClientConfiguration.builder()
+                        .commandTimeout(Duration.ofSeconds(3));
 
-        return new LettuceConnectionFactory(redisConfig, clientConfig);
+        if (useSsl) {
+            builder.useSsl();
+            log.info("Redis SSL enabled (scheme={})", scheme);
+        }
+
+        log.info("Connecting to Redis — host={} port={} ssl={}", host, port, useSsl);
+
+        return new LettuceConnectionFactory(config, builder.build());
     }
 
     @Bean
-    public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory factory) {
-
-        try {
-            var connection = factory.getConnection();
-            String pong = connection.ping();
-            log.info("✅ Redis connected: {}", pong);
-            connection.close();
-        } catch (Exception e) {
-            log.error("❌ Redis connection FAILED: {}", e.getMessage(), e);
-        }
-
+    public RedisTemplate<String, String> redisTemplate(LettuceConnectionFactory factory) {
         RedisTemplate<String, String> template = new RedisTemplate<>();
         template.setConnectionFactory(factory);
-
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new StringRedisSerializer());
-
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(new StringRedisSerializer());
         template.afterPropertiesSet();
+
+        try {
+            String pong = factory.getConnection().ping();
+            log.info("Redis ping: {}", pong);
+        } catch (Exception e) {
+            log.error("Redis connection failed: {}", e.getMessage());
+        }
+
         return template;
     }
 }
