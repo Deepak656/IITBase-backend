@@ -52,6 +52,11 @@ public class TokenService {
             // Also track user's active tokens (for "logout all devices")
             String userTokensKey = USER_TOKENS_PREFIX + email;
             redisTemplate.opsForSet().add(userTokensKey, jti);
+            // Trim if too large
+            Long size = redisTemplate.opsForSet().size(userTokensKey);
+            if (size != null && size > 3) {
+                redisTemplate.opsForSet().pop(userTokensKey); // remove random old
+            }
             redisTemplate.expire(userTokensKey, tokenExpiration, TimeUnit.MILLISECONDS);
 
             log.info("Token stored in Redis - JTI: {}, Email: {}", jti, email);

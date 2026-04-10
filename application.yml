@@ -10,6 +10,10 @@ spring:
     show-sql: false
     properties:
       hibernate:
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
         format_sql: true
   sql:
     init:
@@ -26,7 +30,7 @@ spring:
        pool:
          core-size: 2
          max-size: 5
-         queue-capacity: 100
+         queue-capacity: 50
        thread-name-prefix: async-
 
 server:
@@ -73,13 +77,15 @@ management:
   endpoints:
     web:
       exposure:
-        include: health, info, metrics, env, loggers
+        include: health, info, metrics, prometheus
 
   endpoint:
     health:
       show-details: always
       probes:
         enabled: true
+    metrics:
+      enabled: true
 
   health:
     redis:
@@ -88,5 +94,7 @@ management:
       enabled: true
 
   metrics:
+    enable:
+      all: true
     tags:
       application: iitbase-backend

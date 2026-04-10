@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -15,7 +17,11 @@ public class NotificationRedisService {
 
     public void increment(Long userId) {
         try {
-            redisTemplate.opsForValue().increment(KEY_PREFIX + userId);
+            String key =  KEY_PREFIX + userId;
+            Long newCount = redisTemplate.opsForValue().increment(key);
+            if (newCount != null && newCount == 1) {
+                redisTemplate.expire(key, Duration.ofDays(2)); // 2 days
+            }
         } catch (Exception e) {
             log.warn("Redis unavailable — skipping unread increment for userId={}", userId);
         }

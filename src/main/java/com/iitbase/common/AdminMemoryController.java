@@ -1,4 +1,4 @@
-package com.iitbase.admin.memory;
+package com.iitbase.common;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;

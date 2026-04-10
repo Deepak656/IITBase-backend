@@ -1,3 +1,4 @@
+#application-prod.yml
 spring:
   datasource:
     url: jdbc:postgresql://${PGHOST}:${PGPORT:5432}/${PGDATABASE}
@@ -13,8 +14,8 @@ logging:
   level:
     com.iitbase: INFO
     org.springframework.security: WARN
-    org.springframework.data.redis: DEBUG
-    io.lettuce.core: DEBUG
+    org.springframework.data.redis: WARN
+    io.lettuce.core: WARN
 
 email:
   provider: resend
