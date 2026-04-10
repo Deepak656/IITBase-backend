@@ -12,14 +12,18 @@ import java.util.concurrent.ThreadPoolExecutor;
 @Configuration
 public class AsyncConfig {
 
-    @Bean
-    public Executor emailTaskExecutor() {
+    @Bean(name = {"emailTaskExecutor", "taskExecutor"})
+    public Executor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(2);
-        executor.setMaxPoolSize(5);
-        executor.setQueueCapacity(100);
-        executor.setThreadNamePrefix("email-");
-        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        executor.setCorePoolSize(1);      // was 2 in both pools
+        executor.setMaxPoolSize(3);       // was 5 in both
+        executor.setQueueCapacity(50);
+        executor.setThreadNamePrefix("async-");
+        executor.setRejectedExecutionHandler(
+                new ThreadPoolExecutor.CallerRunsPolicy()
+        );
+        executor.setKeepAliveSeconds(60);      // terminate idle threads
+        executor.setAllowCoreThreadTimeOut(true); // even core threads can die
         executor.initialize();
         return executor;
     }
