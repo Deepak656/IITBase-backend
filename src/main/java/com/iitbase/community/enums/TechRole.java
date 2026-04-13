@@ -2,6 +2,7 @@ package com.iitbase.community.enums;
 
 public enum TechRole {
     BACKEND_ENGINEER,
+    SOFTWARE_ENGINEER,
     FRONTEND_ENGINEER,
     FULL_STACK_ENGINEER,
     MOBILE_ENGINEER,
