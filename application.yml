@@ -1,10 +1,13 @@
 ##application.yml
 spring:
+  main:
+    lazy-initialization: true
   profiles:
     active: ${ACTIVE_PROFILE:prod}
   application:
     name: iitbase-backend
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: update
     show-sql: false
